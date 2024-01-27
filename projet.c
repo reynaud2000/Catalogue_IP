@@ -161,7 +161,11 @@ void recherche_par_masque() {
             if (sscanf(position_masque, "%s", masque_fichier) == 1) {
                 if (strcmp(masque_fichier, masque) == 0) {
                     nb_adresse++;
-                    printf("%d) %s\n", nb_adresse, ligne);
+                    printf("\n%d) %s", nb_adresse, ligne);
+                    char adresse_ip[256];
+                    if (sscanf(ligne, "Adresse: %[^,]", adresse_ip) == 1) {
+                        afficher_representation_ip(adresse_ip);
+                    }
                 }
             }
         }
@@ -170,7 +174,7 @@ void recherche_par_masque() {
     if (nb_adresse == 0) {
         printf("Aucune adresse trouvée avec le masque de sous-réseau spécifié.\n");
     } else {
-        printf("%d adresses trouvées avec le masque de sous-réseau spécifié.\n", nb_adresse);
+        printf("\n%d adresses trouvées avec le masque de sous-réseau spécifié.\n", nb_adresse);
     }
 }
 void supprimer_ip() {
