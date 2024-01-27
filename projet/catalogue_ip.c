@@ -6,8 +6,8 @@
 #include <stdbool.h>
 #include "catalogue_ip.h"
 #include "../interface_GTK/interface.h"
-
 GtkWidget *widget = NULL;
+
 int masque_valide(const char *masque) {
     return (
         strcmp(masque, "255.255.255.255") == 0 ||
@@ -71,7 +71,6 @@ int ip_valide(const char *ip) {
     free(ip_copy);
     return (compteur == 4);
 }
-
 
 
 int ajouter_ip(const char *ip, const char *masque, bool graphique) {
@@ -285,6 +284,7 @@ void menu(int argc, char *argv[]){
         char ip[256];
         char masque[256];
         int b_interface = 1;
+
     char choix;
         do {
             printf("\nMenu:\n");
@@ -301,6 +301,7 @@ void menu(int argc, char *argv[]){
             switch (choix) {
                 case 'a':
                     ajouter_ip(ip,masque,false);
+
                     break;
                 case 'l':
                     lister_ip();
@@ -319,6 +320,7 @@ void menu(int argc, char *argv[]){
                     }
                     printf("%d", b_interface);
                     break;
+
                 case 'q':
                     printf("Au revoir !\n");
                     break;

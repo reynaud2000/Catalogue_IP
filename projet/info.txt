@@ -46,6 +46,7 @@ gcc -c main.c -o main.o
 gcc catalogue_ip.o main.o -o catalogue_ip
 
 
+
 !ATTENTION! avec GTK maintenant compiler avec :
 
     gcc -c ../interface_GTK/interface.c -o interface.o $(pkg-config --cflags gtk+-3.0)
