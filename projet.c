@@ -1,6 +1,17 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
+
+int masque_valide(const char *masque);
+int ip_0_255(const char *partie);
+int ip_valide(const char *ip);
+void ajouter_ip();
+void lister_ip();
+int masque_similaire(const char *ip1, const char *ip2, const char *masque);
+void recherche_par_masque();
+void supprimer_ip();
+void afficher_representation_ip(const char *ip);
 
 int masque_valide(const char *masque) {
     return (
@@ -94,7 +105,6 @@ void ajouter_ip() {
 }
 
 void lister_ip() {
-
     printf("\nOption sélectionnée: Liste des adresses IP\n");
     FILE *fichier = fopen("ad_ip.txt", "r");
     if (fichier == NULL) {
@@ -103,7 +113,11 @@ void lister_ip() {
     }
     char ligne[256];
     while (fgets(ligne, sizeof(ligne), fichier) != NULL) {
-        printf("%s", ligne);
+        printf("\n%s", ligne);
+        char ip[256];
+        if (sscanf(ligne, "Adresse: %[^,]", ip) == 1) {
+            afficher_representation_ip(ip);
+        }
     }
     fclose(fichier);
 }
@@ -217,6 +231,33 @@ void supprimer_ip() {
     } else {
         printf("L'adresse ip %s est introuvable dans le fichier.\n", ip_a_supprimer);
     }
+}
+void afficher_representation_ip(const char *ip) {
+    struct in_addr addr;
+    if (inet_pton(AF_INET, ip, &addr) != 1) {
+        printf("Erreur lors de la conversion de l'adresse IP.\n");
+        return;
+    }
+    printf("Représentation binaire de l'adresse IP %s : ", ip);
+    for (int i = 0; i < 4; ++i) {
+        uint8_t octet = ((uint8_t *)&addr.s_addr)[i];
+        for (int j = 7; j >= 0; --j) {
+            printf("%d", (octet >> j) & 1);
+        }
+        if (i < 3) {
+            printf(".");
+        }
+    }
+    printf("\n");
+    printf("Représentation hexadécimale de l'adresse IP %s : ", ip);
+    for (int i = 0; i < 4; ++i) {
+        uint8_t octet = ((uint8_t *)&addr.s_addr)[i];
+        printf("%02X", octet);
+        if (i < 3) {
+            printf(".");
+        }
+    }
+    printf("\n");
 }
 
 void menu(){
