@@ -1,3 +1,4 @@
+//compilation : gcc interface.c -o interface.o -I/usr/include/SDL2 -I./include -lSDL2 -lSDL2_ttf
 
 SDL_Window *creation_de_fenetre() {
     SDL_Window *window = NULL;
@@ -8,6 +9,7 @@ SDL_Window *creation_de_fenetre() {
     }
 
     window = SDL_CreateWindow("IP C-atalogue", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, 0);
+    
 
     if (window == NULL) {
         SDL_Log("Erreur : Création de la fenêtre > %s\n", SDL_GetError());
