@@ -1,12 +1,13 @@
 // Importer des bibliothèques
-//gcc -o interface.o interface.c $(pkg-config --cflags --libs gtk+-3.0) -pthread
 
+//gcc -o interface.o interface.c $(pkg-config --cflags --libs gtk+-3.0) -pthread
 #include <gtk/gtk.h>
 #include <pango/pangocairo.h>
 #include <stdio.h>
 #include <pthread.h>
 #include "interface.h"
 #include "../projet/catalogue_ip.h"
+
 
 //déclarer les variable globales.
 
@@ -24,6 +25,7 @@ const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data) {
      elle prend en paramètre  des données et un widget.
     */
     const gchar *bouton_ecrire_texte = (const gchar *)data;
+
     if (strcmp(bouton_ecrire_texte, "Ajouter une adresse IP") == 0) {
 
         // créer la popup pour écrire unea dresse ip
@@ -99,7 +101,6 @@ const char *fenetre_input_masque(GtkWidget *widget, const char *data) {
             gtk_widget_destroy(dialog);
             return masque;
         }
-        
 
         // Fermer la popup
         gtk_widget_destroy(dialog);
@@ -125,7 +126,7 @@ void popup_erreur(){
 
             gtk_widget_destroy(dialog);
     }
-        
+
 }
 
 void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -160,8 +161,6 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
                 free((void *)ip_address);
                 free((void *)masque);
             }
-            
-    
 
         if ((x >= 537 && x <= 826) && (y >= 221 && y <= 314)) {
             printf("Clic sur le bouton 'Selectionner une adresse'\n");
@@ -174,7 +173,9 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
         }
     }
 }
+
 }
+
 
 void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gchar *text) {
 
@@ -196,6 +197,7 @@ void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gcha
 }
 
 int menu_interface(int argc, char *argv[]) {
+
 
     /*
         Cette fonction (retourne rien) permet de créer un menu (avec des boutons).
@@ -247,10 +249,10 @@ int menu_interface(int argc, char *argv[]) {
 
     //Connect la croix de la fenêtre pour la fermer
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-
     //lance la boucle principale de l'interface graphique GTK
     gtk_main();
 
     return 0;
 }
+
 
