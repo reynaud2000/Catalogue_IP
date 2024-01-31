@@ -2,8 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 #include "catalogue_ip.h"
-
+#include "../interface_GTK/interface.h"
 int masque_valide(const char *masque) {
     return (
         strcmp(masque, "255.255.255.255") == 0 ||
@@ -67,32 +68,46 @@ int ip_valide(const char *ip) {
     free(ip_copy);
     return (compteur == 4);
 }
-void ajouter_ip() {
+void ajouter_ip(bool graphique) {
 
     char ip[256];
     char masque[256];
 
-    printf("\nOption sélectionnée : Ajouter une nouvelle adresse IP\n");
-    printf("Entrez une adresse ip: ");
-    if (scanf("%255s", ip) != 1 || !ip_valide(ip)) {
-        printf("Veuillez entrer une adresse IP valide.\n");
-        while (getchar() != '\n');
-        return;
+    if(graphique == false){
+
+        printf("\nOption sélectionnée : Ajouter une nouvelle adresse IP\n");
+        printf("Entrez une adresse ip: ");
+        if (scanf("%255s", ip) != 1 || !ip_valide(ip)) {
+            printf("Veuillez entrer une adresse IP valide.\n");
+            while (getchar() != '\n');
+            return;
+        }
+        printf("Entrez un masque: ");
+        if (scanf("%255s", masque) != 1 || !masque_valide(masque)) {
+            printf("Veuillez entrer un masque valide.\n");
+            while (getchar() != '\n');
+            return;
+        }
+        FILE *fichier = fopen("ad_ip.txt", "a");
+        if (fichier == NULL) {
+            printf("Impossible d'écrire dans le fichier.\n");
+            return;
+        }
+        fprintf(fichier, "Adresse: %s, Masque: %s\n", ip, masque);
+        fclose(fichier);
+        printf("L'adresse %s avec le masque %s est ajouté avec succès et enregistré dans le fichier.\n", ip, masque);
+
     }
-    printf("Entrez un masque: ");
-    if (scanf("%255s", masque) != 1 || !masque_valide(masque)) {
-        printf("Veuillez entrer un masque valide.\n");
-        while (getchar() != '\n');
-        return;
+    else{
+            char int_ip [256];
+            fenetre_input(NULL,int_ip); 
+            if (scanf("%255s", int_ip) != 1 || !ip_valide(int_ip)) {
+            printf("Veuillez entrer une adresse IP valide.\n");
+            while (getchar() != '\n');
+            return;
+        }
     }
-    FILE *fichier = fopen("ad_ip.txt", "a");
-    if (fichier == NULL) {
-        printf("Impossible d'écrire dans le fichier.\n");
-        return;
-    }
-    fprintf(fichier, "Adresse: %s, Masque: %s\n", ip, masque);
-    fclose(fichier);
-    printf("L'adresse %s avec le masque %s est ajouté avec succès et enregistré dans le fichier.\n", ip, masque);
+   
 }
 
 void lister_ip() {
@@ -254,7 +269,7 @@ void afficher_representation_ip(const char *ip) {
     }
     printf("\n");
 }
-void menu(){
+void menu(int argc, char *argv[]){
     char choix;
         do {
             printf("\nMenu:\n");
@@ -262,6 +277,7 @@ void menu(){
             printf("l - Liste les adresses IP.\n");
             printf("s - Rechercher par masque de sous-réseau.\n");
             printf("d - Supprimer une adresse IP.\n");
+            printf("g - mode graphique.\n");
             printf("q - Quitter.\n");
 
             printf("Entrez votre choix : ");
@@ -269,7 +285,7 @@ void menu(){
 
             switch (choix) {
                 case 'a':
-                    ajouter_ip();
+                    ajouter_ip(false);
                     break;
                 case 'l':
                     lister_ip();
@@ -279,6 +295,9 @@ void menu(){
                     break;
                 case 'd':
                     supprimer_ip();
+                    break;
+                case 'g':
+                    menu_interface(argc, argv);
                     break;
                 case 'q':
                     printf("Au revoir !\n");
