@@ -1,3 +1,26 @@
+# Prérequis pour le code 
+ 
+
+1. Installer les bibliothèques essentielles:
+
+    ```
+    sudo apt-get install build-essential
+
+    ```
+    
+2. Installer GTK:
+
+    ```
+        sudo apt-get install libgtk-3-dev
+        
+    ```
+
+3. Installer Pango et Cairo:
+
+    ```
+        sudo apt-get install libpango1.0-dev libcairo2-dev
+    ```
+
 # IP C-atalogue
 
 Vous allez créer un utilitaire permettant de cataloguer les adresses IP(v4).

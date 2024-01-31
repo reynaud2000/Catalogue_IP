@@ -49,10 +49,12 @@ char fenetre_input(GtkWidget *widget, gpointer data) {
 
             // Récupérer la valeur écrite 
             const char *ip_address = gtk_entry_get_text(GTK_ENTRY(entry));
+            
             g_print("Adresse IP saisie : %s\n", ip_address);
             gtk_widget_destroy(dialog);
             return *ip_address;
         }
+        ajouter_ip(true);
 
         // Fermer la popup
         gtk_widget_destroy(dialog);
