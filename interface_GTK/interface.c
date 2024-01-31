@@ -1,10 +1,10 @@
 // Importer des bibliothèques
-
+//gcc -o interface.o interface.c $(pkg-config --cflags --libs gtk+-3.0)
 #include <gtk/gtk.h>
 #include <pango/pangocairo.h>
 #include <stdio.h>
 #include "interface.h"
-#include "/home/morgane/Projet_C_S1/projet/catalogue_ip.c"
+#include "../projet/catalogue_ip.h"
 
 //déclarer les variable globales.
 
@@ -15,10 +15,10 @@ GtkWidget *dialog = NULL;
 GtkWidget *content_area = NULL;
 GtkWidget *entry = NULL;
 
-void fenetre_input(GtkWidget *widget, gpointer data) {
+char fenetre_input(GtkWidget *widget, gpointer data) {
 
     /*
-     Cette fonction ne retourne rien, elle permet d'ouvrir une popup permettant d'écrire une adresse IP et de la valider.
+     Cette fonction un char, elle permet d'ouvrir une popup permettant d'écrire une adresse IP et de la valider.
      elle prend en paramètre  des données et un widget.
     */
 
@@ -50,6 +50,8 @@ void fenetre_input(GtkWidget *widget, gpointer data) {
             // Récupérer la valeur écrite 
             const char *ip_address = gtk_entry_get_text(GTK_ENTRY(entry));
             g_print("Adresse IP saisie : %s\n", ip_address);
+            gtk_widget_destroy(dialog);
+            return *ip_address;
         }
 
         // Fermer la popup
@@ -168,8 +170,3 @@ void menu_interface(int argc, char *argv[]) {
     gtk_main();
 }
 
-int main(int argc, char *argv[]) {
-
-    menu_interface(argc, argv);
-    return 0;
-}
