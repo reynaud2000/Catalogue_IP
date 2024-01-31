@@ -4,6 +4,7 @@
 #include <pango/pangocairo.h>
 #include <stdio.h>
 #include "interface.h"
+#include "/home/morgane/Projet_C_S1/projet/catalogue_ip.c"
 
 //déclarer les variable globales.
 
@@ -110,7 +111,7 @@ void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gcha
     g_signal_connect(button, "button-press-event", G_CALLBACK(clique), NULL);
 }
 
-void menu(int argc, char *argv[]) {
+void menu_interface(int argc, char *argv[]) {
 
     /*
         Cette fonction (retourne rien) permet de créer un menu (avec des boutons).
@@ -169,6 +170,6 @@ void menu(int argc, char *argv[]) {
 
 int main(int argc, char *argv[]) {
 
-    menu(argc, argv);
+    menu_interface(argc, argv);
     return 0;
 }
