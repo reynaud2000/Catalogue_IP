@@ -52,8 +52,6 @@ const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data) {
             
             g_print("Adresse IP saisie : %s\n", ip_address);
             gtk_widget_destroy(dialog);
-
-            
             return ip_address;
         }
         // Fermer la popup
