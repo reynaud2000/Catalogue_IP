@@ -1,8 +1,10 @@
 // Importer des bibliothèques
-//gcc -o interface.o interface.c $(pkg-config --cflags --libs gtk+-3.0)
+//gcc -o interface.o interface.c $(pkg-config --cflags --libs gtk+-3.0) -pthread
+
 #include <gtk/gtk.h>
 #include <pango/pangocairo.h>
 #include <stdio.h>
+#include <pthread.h>
 #include "interface.h"
 #include "../projet/catalogue_ip.h"
 
@@ -15,15 +17,13 @@ GtkWidget *dialog = NULL;
 GtkWidget *content_area = NULL;
 GtkWidget *entry = NULL;
 
-char fenetre_input(GtkWidget *widget, gpointer data) {
+const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data) {
 
     /*
      Cette fonction un char, elle permet d'ouvrir une popup permettant d'écrire une adresse IP et de la valider.
      elle prend en paramètre  des données et un widget.
     */
-
     const gchar *bouton_ecrire_texte = (const gchar *)data;
-    
     if (strcmp(bouton_ecrire_texte, "Ajouter une adresse IP") == 0) {
 
         // créer la popup pour écrire unea dresse ip
@@ -48,17 +48,65 @@ char fenetre_input(GtkWidget *widget, gpointer data) {
         if (response == GTK_RESPONSE_ACCEPT) {
 
             // Récupérer la valeur écrite 
-            const char *ip_address = gtk_entry_get_text(GTK_ENTRY(entry));
+            const char *ip_address = strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
             
             g_print("Adresse IP saisie : %s\n", ip_address);
             gtk_widget_destroy(dialog);
-            return *ip_address;
+
+            
+            return ip_address;
         }
-        ajouter_ip(true);
+        // Fermer la popup
+        gtk_widget_destroy(dialog);
+        
+    }
+    return NULL; 
+}
+
+const char *fenetre_input_masque(GtkWidget *widget, const char *data) {
+
+    /*
+     Cette fonction un char, elle permet d'ouvrir une popup permettant d'écrire une adresse IP et de la valider.
+     elle prend en paramètre  des données et un widget.
+    */
+    const gchar *bouton_ecrire_texte = (const gchar *)data;
+    bouton_ecrire_texte = "Ajouter une un masque";
+    if (strcmp(bouton_ecrire_texte, "Ajouter une un masque") == 0) {
+
+        // créer la popup pour écrire un masque
+
+        dialog = gtk_dialog_new_with_buttons("Ajouter une un masque",
+            GTK_WINDOW(window), GTK_DIALOG_MODAL, "Valider", GTK_RESPONSE_ACCEPT, "Annuler", GTK_RESPONSE_CANCEL, NULL);
+
+        // récupère la zone du contenu de dialog
+
+        content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+
+        // Ajouter un champ de texte 
+        entry = gtk_entry_new();
+        gtk_container_add(GTK_CONTAINER(content_area), entry);
+
+        // Affiche tout les Widget
+
+        gtk_widget_show_all(dialog);
+
+        gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+        if (response == GTK_RESPONSE_ACCEPT) {
+
+            // Récupérer la valeur écrite 
+            const char *masque = strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
+            
+            g_print("Masque saisie : %s\n", masque);
+            gtk_widget_destroy(dialog);
+            return masque;
+        }
+        
 
         // Fermer la popup
         gtk_widget_destroy(dialog);
     }
+    return NULL; 
 }
 
 void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
@@ -80,10 +128,15 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
 
         if ((x >= 187 && x <= 480) && (y >= 221 && y <= 314)) {
 
-            // appelle la fonction fenetre_input pour ouvrir une popup permmettant à l'utilisateur d'écrire.
+            // appelle la fonction fenetre_input_adresse_ip pour ouvrir une popup permmettant à l'utilisateur d'écrire.
 
-            fenetre_input(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget))); 
-        }
+            const char *ip_address =fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+            const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget))); 
+            printf("%s %s\n",ip_address,masque);
+            ajouter_ip(ip_address, masque, true);
+            free((void *)ip_address);
+            free((void *)masque);
+
         if ((x >= 537 && x <= 826) && (y >= 221 && y <= 314)) {
             printf("Clic sur le bouton 'Selectionner une adresse'\n");
         }
@@ -94,6 +147,7 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
             printf("Clic sur le bouton 'Recherche par masque'\n");
         }
     }
+}
 }
 
 void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gchar *text) {

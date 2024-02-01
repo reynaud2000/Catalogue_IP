@@ -14,9 +14,12 @@ extern GtkWidget *content_area;
 extern GtkWidget *entry;
 
 // Déclarer les fonctions
-char fenetre_input(GtkWidget *widget, gpointer data);
+const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data);
+const char *fenetre_input_masque(GtkWidget *widget, const char *data);
 void clique(GtkWidget *widget, GdkEventButton *event, gpointer data);
 void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gchar *text);
 void menu_interface(int argc, char *argv[]);
+
+
 
 #endif // INTERFACE_H
