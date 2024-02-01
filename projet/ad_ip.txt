@@ -1,0 +1,4 @@
+Adresse: 2.2.2.2, Masque: 255.255.255.255
+Adresse: 192.168.1.0, Masque: 255.255.255.0
+Adresse: 192.181.3.3, Masque: 255.255.255.0
+Adresse: 192.1.1.1, Masque: 255.255.255.0

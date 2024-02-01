@@ -74,7 +74,7 @@ int ip_valide(const char *ip) {
 
 
 
-void ajouter_ip(const char *ip, const char *masque, bool graphique) {
+int ajouter_ip(const char *ip, const char *masque, bool graphique) {
 
     if (graphique == false) {
         printf("\nOption sélectionnée : Ajouter une nouvelle adresse IP\n");
@@ -82,13 +82,13 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
         if (scanf("%255s", ip) != 1 || !ip_valide(ip)) {
             printf("Veuillez entrer une adresse IP valide.\n");
             while (getchar() != '\n');
-            return;
+            return 1;
         }
         printf("Entrez un masque: ");
         if (scanf("%255s", masque) != 1 || !masque_valide(masque)) {
             printf("Veuillez entrer un masque valide.\n");
             while (getchar() != '\n');
-            return;
+            return 1;
         }
     } else {
         
@@ -97,26 +97,27 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
             printf("%s\n",ip);
             printf("Veuillez entrer une adresse IP valide.\n");
             while (getchar() != '\n');
-            return;
+            return 0;
         }
         printf("Entrez un masque: ");
         if (masque == NULL | !masque_valide(masque)) {
             printf("Veuillez entrer un masque valide.\n");
             while (getchar() != '\n');
-            return;
+            return 0;
         }
     }
 
     FILE *fichier = fopen("ad_ip.txt", "a");
     if (fichier == NULL) {
         printf("Impossible d'écrire dans le fichier.\n");
-        return;
+        return 0;
     }
     
     fprintf(fichier, "Adresse: %s, Masque: %s\n", ip, masque);
     fclose(fichier);
     
     printf("L'adresse %s avec le masque %s est ajoutée avec succès et enregistrée dans le fichier.\n", ip, masque);
+    return 1;
 }
    
 
@@ -283,6 +284,7 @@ void afficher_representation_ip(const char *ip) {
 void menu(int argc, char *argv[]){
         char ip[256];
         char masque[256];
+        int b_interface = 1;
     char choix;
         do {
             printf("\nMenu:\n");
@@ -310,8 +312,12 @@ void menu(int argc, char *argv[]){
                     supprimer_ip();
                     break;
                 case 'g':
-                    menu_interface(argc, argv);
-                    ajouter_ip(ip,masque,true);
+                    int b_interface  = menu_interface(argc, argv);
+                     if (b_interface == 0) {
+                    printf("Au revoir !\n");
+                    return; 
+                    }
+                    printf("%d", b_interface);
                     break;
                 case 'q':
                     printf("Au revoir !\n");

@@ -109,6 +109,27 @@ const char *fenetre_input_masque(GtkWidget *widget, const char *data) {
     return NULL; 
 }
 
+void popup_erreur(){
+    
+    GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
+    dialog = gtk_dialog_new_with_buttons("Attention", NULL, flags,
+                                     "OK", GTK_RESPONSE_ACCEPT,NULL);
+    GtkWidget *label = gtk_label_new("Erreur de la saisi de l'adresse IP ou masque. Merci de le saisir sous forme X.X.X.X");
+    gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), label);
+
+    // Affiche tout
+    gtk_widget_show_all(dialog);
+
+    // Traitement de la réponse
+     gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    if (response == GTK_RESPONSE_ACCEPT) {
+
+            gtk_widget_destroy(dialog);
+    }
+        
+}
+
 void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
 
     /*
@@ -127,15 +148,22 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
         // Vérifie si le boutton Ajouter une adresse est cliqué
 
         if ((x >= 187 && x <= 480) && (y >= 221 && y <= 314)) {
-
+            int add_ip = 0;
             // appelle la fonction fenetre_input_adresse_ip pour ouvrir une popup permmettant à l'utilisateur d'écrire.
-
-            const char *ip_address =fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
-            const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget))); 
-            printf("%s %s\n",ip_address,masque);
-            ajouter_ip(ip_address, masque, true);
-            free((void *)ip_address);
-            free((void *)masque);
+            while (add_ip != 1)
+            {
+                const char *ip_address =fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+                const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+                add_ip = ajouter_ip(ip_address, masque, true);
+                if(add_ip != 1){
+                    popup_erreur();
+                }
+                
+                free((void *)ip_address);
+                free((void *)masque);
+            }
+            
+    
 
         if ((x >= 537 && x <= 826) && (y >= 221 && y <= 314)) {
             printf("Clic sur le bouton 'Selectionner une adresse'\n");
@@ -169,7 +197,7 @@ void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gcha
     g_signal_connect(button, "button-press-event", G_CALLBACK(clique), NULL);
 }
 
-void menu_interface(int argc, char *argv[]) {
+int menu_interface(int argc, char *argv[]) {
 
     /*
         Cette fonction (retourne rien) permet de créer un menu (avec des boutons).
@@ -222,7 +250,9 @@ void menu_interface(int argc, char *argv[]) {
     //Connect la croix de la fenêtre pour la fermer
     g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 
-    //ance la boucle principale de l'interface graphique GTK
+    //lance la boucle principale de l'interface graphique GTK
     gtk_main();
+
+    return 0;
 }
 

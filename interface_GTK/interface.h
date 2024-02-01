@@ -18,7 +18,7 @@ const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data);
 const char *fenetre_input_masque(GtkWidget *widget, const char *data);
 void clique(GtkWidget *widget, GdkEventButton *event, gpointer data);
 void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gchar *text);
-void menu_interface(int argc, char *argv[]);
+int menu_interface(int argc, char *argv[]);
 
 
 
