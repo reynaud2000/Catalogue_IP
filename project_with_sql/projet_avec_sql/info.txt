@@ -1,0 +1,10 @@
+Compiler en faisant les 3 commandes : 
+
+
+gcc -c catalogue_ip.c -o catalogue_ip.o
+gcc -c main.c -o main.o
+gcc -o catalogue_ip catalogue_ip.o main.o -lsqlite3
+
+Puis exécuter avec cette commande : 
+
+./catalogue_ip
