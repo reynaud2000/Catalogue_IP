@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <sqlite3.h>
 #define DB_PATH "catalogue_ip.db"
@@ -145,7 +146,7 @@ void convertir_masque_en_hexa(const char *adresse_ip, char *adresse_ip_hexa) {
     sprintf(adresse_ip_hexa, "%02X.%02X.%02X.%02X", octets[0], octets[1], octets[2], octets[3]);
 }
 
-void ajouter_ip(const char *ip, const char *masque, bool graphique) {
+int ajouter_ip(const char *ip, const char *masque, bool graphique) {
 
 
     if (graphique == false) {
@@ -157,13 +158,13 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
 
     if (!ip_valide(ip) || !masque_valide(masque)) {
         printf("Adresse IP ou masque invalide.\n");
-        return;
+        return 0;
     }
     
 
     if (existe_dans_base(ip, masque)) {
         printf("L'adresse IP et le masque sont déjà présents dans la base.\n");
-        return;
+        return 1;
     }
 
     sqlite3 *db;
@@ -180,10 +181,10 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
     char ip_hexa[11];
     char masque_hexa[11];
 
-    convertir_ip_en_binaire(ip_saisie, ip_binaire);
-    convertir_masque_en_binaire(masque_saisi, masque_binaire);
-    convertir_ip_en_hexa(ip_saisie, ip_hexa);
-    convertir_masque_en_hexa(masque_saisi, masque_hexa);
+    convertir_ip_en_binaire(ip, ip_binaire);
+    convertir_masque_en_binaire(masque, masque_binaire);
+    convertir_ip_en_hexa(ip, ip_hexa);
+    convertir_masque_en_hexa(masque, masque_hexa);
 
     const char *sql = "INSERT INTO ip_masque (ip, masque, ip_binaire, masque_binaire, ip_hexa, masque_hexa) VALUES (?, ?, ?, ?, ?, ?);";
     sqlite3_stmt *stmt;
@@ -195,8 +196,8 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
         exit(1);
     }
 
-    sqlite3_bind_text(stmt, 1, ip_saisie, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, masque_saisi, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, masque, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, ip_binaire, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, masque_binaire, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 5, ip_hexa, -1, SQLITE_STATIC);
@@ -211,6 +212,7 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
 
     sqlite3_finalize(stmt);
     sqlite3_close(db);
+    return 1;
 }
 
 int existe_dans_base(const char *ip, const char *masque) {
@@ -409,7 +411,7 @@ void menu(int argc, char *argv[]){
             printf("a - Ajouter une nouvelle adresse IP.\n");
             printf("l - Liste les adresses IP.\n");
             printf("r - Rechercher par masque de sous-réseau.\n");
-            printf("s - Supprimer une adresse IP.\n")
+            printf("s - Supprimer une adresse IP.\n");
             printf("g - mode graphique.\n");;
             printf("q - Quitter.\n");
 

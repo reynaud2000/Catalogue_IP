@@ -281,9 +281,9 @@ void afficher_representation_ip(const char *ip) {
     printf("\n");
 }
 void menu(int argc, char *argv[]){
-        char ip[256];
-        char masque[256];
-        int b_interface = 1;
+    char ip[256];
+    char masque[256];
+    int b_interface = 1;
 
     char choix;
         do {
