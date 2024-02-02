@@ -20,5 +20,5 @@ const char *fenetre_input_masque(GtkWidget *widget, const char *data);
 void clique(GtkWidget *widget, GdkEventButton *event, gpointer data);
 void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gchar *text);
 int menu_interface(int argc, char *argv[]);
-
+void affiche_liste_ip();
 #endif // INTERFACE_H
