@@ -110,46 +110,24 @@ void creer_base_sql() {
     sqlite3_close(db);
 }
 
-void convertir_ip_en_binaire(const char *adresse_ip, char *adresse_ip_binaire) {
+void convertir_en_binaire(const char *adresse, char *binaire) {
     int octets[4];
-    sscanf(adresse_ip, "%d.%d.%d.%d", &octets[0], &octets[1], &octets[2], &octets[3]);
+    sscanf(adresse, "%d.%d.%d.%d", &octets[0], &octets[1], &octets[2], &octets[3]);
 
     int index = 0;
     for (int i = 0; i < 4; i++) {
         int reste = octets[i];
         for (int j = 7; j >= 0; j--) {
-            adresse_ip_binaire[index++] = (reste & (1 << j)) ? '1' : '0';
+            binaire[index++] = (reste & (1 << j)) ? '1' : '0';
         }
         if (i < 3) {
-            adresse_ip_binaire[index++] = '.';
+            binaire[index++] = '.';
         }
     }
-    adresse_ip_binaire[index] = '\0';
-}
-void convertir_masque_en_binaire(const char *masque, char *masque_binaire) {
-    int octets[4];
-    sscanf(masque, "%d.%d.%d.%d", &octets[0], &octets[1], &octets[2], &octets[3]);
-
-    int index = 0;
-    for (int i = 0; i < 4; i++) {
-        int reste = octets[i];
-        for (int j = 7; j >= 0; j--) {
-            masque_binaire[index++] = (reste & (1 << j)) ? '1' : '0';
-        }
-        if (i < 3) {
-            masque_binaire[index++] = '.';
-        }
-    }
-    masque_binaire[index] = '\0';
+    binaire[index] = '\0';
 }
 
-void convertir_ip_en_hexa(const char *adresse_ip, char *adresse_ip_hexa) {
-    int octets[4];
-    sscanf(adresse_ip, "%d.%d.%d.%d", &octets[0], &octets[1], &octets[2], &octets[3]);
-
-    sprintf(adresse_ip_hexa, "%02X.%02X.%02X.%02X", octets[0], octets[1], octets[2], octets[3]);
-}
-void convertir_masque_en_hexa(const char *adresse_ip, char *adresse_ip_hexa) {
+void convertir_en_hexa(const char *adresse_ip, char *adresse_ip_hexa) {
     int octets[4];
     sscanf(adresse_ip, "%d.%d.%d.%d", &octets[0], &octets[1], &octets[2], &octets[3]);
 
@@ -157,25 +135,28 @@ void convertir_masque_en_hexa(const char *adresse_ip, char *adresse_ip_hexa) {
 }
 
 int ajouter_ip(const char *ip, const char *masque, bool graphique) {
-
-
     if (graphique == false) {
-    printf("Entrez une adresse IP : ");
-    scanf("%15s", ip);
-    printf("Entrez un masque : ");
-    scanf("%15s", masque);
+        printf("Entrez une adresse IP : ");
+        scanf("%15s", ip);
+        printf("Entrez un masque : ");
+        scanf("%15s", masque);
     }
 
     if (!ip_valide(ip) || !masque_valide(masque)) {
         printf("Adresse IP ou masque invalide.\n");
         return 0;
     }
-    
 
     if (existe_dans_base(ip, masque)) {
         printf("L'adresse IP et le masque sont déjà présents dans la base.\n");
         return 1;
     }
+
+    char ip_hexa[16];
+    char masque_hexa[16];
+
+    convertir_en_hexa(ip, ip_hexa);
+    convertir_en_hexa(masque, masque_hexa);
 
     sqlite3 *db;
     int rc;
@@ -188,13 +169,9 @@ int ajouter_ip(const char *ip, const char *masque, bool graphique) {
 
     char ip_binaire[36];
     char masque_binaire[36];
-    char ip_hexa[11];
-    char masque_hexa[11];
 
-    convertir_ip_en_binaire(ip, ip_binaire);
-    convertir_masque_en_binaire(masque, masque_binaire);
-    convertir_ip_en_hexa(ip, ip_hexa);
-    convertir_masque_en_hexa(masque, masque_hexa);
+    convertir_en_binaire(ip, ip_binaire);
+    convertir_en_binaire(masque, masque_binaire);
 
     const char *sql = "INSERT INTO ip_masque (ip, masque, ip_binaire, masque_binaire, ip_hexa, masque_hexa) VALUES (?, ?, ?, ?, ?, ?);";
     sqlite3_stmt *stmt;
@@ -318,7 +295,6 @@ char *lister_ip(bool graphique) {
 }
 
 
-
 char * recherche_par_masque(const char *masque_recherche, bool graphique) {
     
     char *resultats = g_strdup("");
@@ -364,9 +340,9 @@ char * recherche_par_masque(const char *masque_recherche, bool graphique) {
     int adresse_trouvee = 0;
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        const unsigned char *ip = sqlite3_column_text(stmt, 0); 
-        const unsigned char *ip_binaire = sqlite3_column_text(stmt, 1); 
-        const unsigned char *ip_hexa = sqlite3_column_text(stmt, 2); 
+        const unsigned char *ip = sqlite3_column_text(stmt, 0);
+        const unsigned char *ip_binaire = sqlite3_column_text(stmt, 1);
+        const unsigned char *ip_hexa = sqlite3_column_text(stmt, 2);
 
         if(graphique == false){
             printf("Adresses IP avec le masque %s :\n", masque_recherche);
@@ -378,7 +354,6 @@ char * recherche_par_masque(const char *masque_recherche, bool graphique) {
             resultats = g_strconcat(resultats,"Liste des adresses IP :\n","------------------------------------------------\n",
                 "IP: ", ip,"| Masque Binaire:",ip_binaire,"| IP Hexa:",ip_hexa,"\n", NULL);
         }
-        
         
         adresse_trouvee = 1;
     }
