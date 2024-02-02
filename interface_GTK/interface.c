@@ -25,7 +25,7 @@ const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data) {
      elle prend en paramètre  des données et un widget.
     */
     const gchar *bouton_ecrire_texte = (const gchar *)data;
-
+    bouton_ecrire_texte = "Ajouter une adresse IP";
     if (strcmp(bouton_ecrire_texte, "Ajouter une adresse IP") == 0) {
 
         // créer la popup pour écrire unea dresse ip
