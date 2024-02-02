@@ -56,10 +56,10 @@ const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data) {
             gtk_widget_destroy(dialog);
             return ip_address;
         }
-        /*else if (response == GTK_RESPONSE_CANCEL)
-        {
+        else if (response == GTK_RESPONSE_CANCEL) {
             gtk_widget_destroy(dialog);
-        }*/
+            return NULL;
+        }
         
         // Fermer la popup
         gtk_widget_destroy(dialog);
@@ -106,6 +106,10 @@ const char *fenetre_input_masque(GtkWidget *widget, const char *data) {
             gtk_widget_destroy(dialog);
             return masque;
         }
+        else if (response == GTK_RESPONSE_CANCEL) {
+            gtk_widget_destroy(dialog);
+            return NULL;
+        }
 
         // Fermer la popup
         gtk_widget_destroy(dialog);
@@ -132,14 +136,54 @@ void popup_erreur(){
             gtk_widget_destroy(dialog);
     }
 
+
 }
 
-void affiche_liste_ip() {
+void recherche_via_masque(GtkWidget *widget){
+
+    const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+    affiche_liste(recherche_par_masque(masque,true));
+    free((void *)masque);
+}
+
+void suppression_ip(GtkWidget *widget) {
+    
+    const char *ip_address = fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+    const char *masque = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+
+    if (ip_address && masque) {
+        affiche_liste(supprimer_ip(ip_address, masque, true));
+        free((void *)ip_address);
+        free((void *)masque);
+    }
+}
+
+
+void popup_ajout_base(){
+    
+    GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
+    dialog = gtk_dialog_new_with_buttons("Confirmation", NULL, flags,
+                                     "OK", GTK_RESPONSE_ACCEPT,NULL);
+    GtkWidget *label = gtk_label_new("L'adresse et le masque on bien été ajouté dans la base de donnée");
+    gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), label);
+
+    // Affiche tout
+    gtk_widget_show_all(dialog);
+
+    // Traitement de la réponse
+     gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+
+    if (response == GTK_RESPONSE_ACCEPT) {
+
+            gtk_widget_destroy(dialog);
+    }
+
+}
+
+void affiche_liste(char *resultats) {
     GtkWidget *window, *label;
     GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
-    window = gtk_dialog_new_with_buttons("Liste IP", NULL, flags, NULL);
-
-    char *resultats = lister_ip(true);  
+    window = gtk_dialog_new_with_buttons("Liste IP", NULL, flags,"OK", GTK_RESPONSE_ACCEPT, NULL); 
     label = gtk_label_new(resultats);
     g_free(resultats);  
 
@@ -150,6 +194,7 @@ void affiche_liste_ip() {
     if (response == GTK_RESPONSE_ACCEPT) {
         gtk_widget_destroy(window);
     }
+    
 }
 
 
@@ -181,21 +226,26 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
                 if(add_ip != 1){
                     popup_erreur();
                 }
+                else if (ip_address == NULL || masque == NULL)
+                {
+                    add_ip = 1;
+                }
+                
                 free((void *)ip_address);
                 free((void *)masque);
             }
+            popup_ajout_base();
         }
             
 
         if ((x >= 537 && x <= 826) && (y >= 221 && y <= 314)) {
-            printf("Clic sur le bouton 'Supprimer une adresse IP'\n");
+            suppression_ip(widget);
         }
         if ((x >= 187 && x <= 480) && (y >= 410 && y <= 502)) {
-            printf("Clic sur le bouton 'Liste les adresses IP'\n");
-            affiche_liste_ip();
+            affiche_liste(lister_ip(true));
         }
         if ((x >= 537 && x <= 826) && (y >= 410 && y <= 502)) {
-            printf("Clic sur le bouton 'Recherche par masque'\n");
+            recherche_via_masque(widget);
         }
     
 }
@@ -250,7 +300,7 @@ int menu_interface(int argc, char *argv[]) {
     creation_rectangle(GTK_WIDGET(fixed), 150, 150, 300, 100, "Ajouter une adresse IP");
     creation_rectangle(GTK_WIDGET(fixed), 150, 339, 300, 100, "Liste les adresses IP");
     creation_rectangle(GTK_WIDGET(fixed), 500, 150, 300, 100, "Supprimer une adresse IP");
-    creation_rectangle(GTK_WIDGET(fixed), 500, 339, 300, 100, "Recherche par masque de sous réseau");
+    creation_rectangle(GTK_WIDGET(fixed), 500, 339, 300, 100, "Recherche via le masque");
 
     // Utilise la variable globale label pour nommé la fenêtre 
     label = gtk_label_new("IP C-atalogue");

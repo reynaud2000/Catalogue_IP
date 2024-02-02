@@ -11,8 +11,8 @@ void convertir_en_hexa(const char *adresse_ip, char *adresse_ip_hexa);
 int ajouter_ip(const char *ip, const char *masque, bool graphique);
 char *lister_ip(bool graphique);
 int masque_similaire(const char *ip1, const char *ip2, const char *masque);
-void recherche_par_masque();
-void supprimer_ip();
+char * recherche_par_masque(const char *masque_recherche, bool graphique);
+char * supprimer_ip(const char *ip, const char *masque, bool graphique);
 void afficher_representation_ip(const char *ip);
 void menu(int argc, char *argv[]);
 

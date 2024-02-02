@@ -9,6 +9,11 @@
 #include "../interface_GTK/interface.h"
 
 int masque_valide(const char *masque) {
+    
+      if (masque == NULL) {
+        printf("ERREUR : Chaîne d'adresse IP NULL\n");
+        return 0;
+    }
     return (
         strcmp(masque, "255.255.255.255") == 0 ||
         strcmp(masque, "255.255.255.254") == 0 ||
@@ -52,6 +57,11 @@ int ip_0_255(const char *partie) {
 }
 
 int ip_valide(const char *ip) {
+
+    if (ip == NULL) {
+        printf("ERREUR : Chaîne d'adresse IP NULL\n");
+        return 0;
+    }
     char *ip_copy = strdup(ip);
     if (ip_copy == NULL) {
         printf("ERREUR\n");
@@ -253,12 +263,14 @@ char *lister_ip(bool graphique) {
     sqlite3 *db;
     sqlite3_stmt *stmt;
     int rc;
+     char *resultats = g_strdup("");
 
     rc = sqlite3_open(DB_PATH, &db);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return g_strdup("Impossible d'ouvrir la base de données");
+        resultats = g_strdup("Impossible d'ouvrir la base de données");
+        return resultats;
     }
 
     const char *sql = "SELECT * FROM ip_masque";
@@ -266,11 +278,12 @@ char *lister_ip(bool graphique) {
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return g_strdup("Erreur lors de la préparation de la requête");
+        resultats = g_strdup("Erreur lors de la préparation de la requête");
+        return resultats;
     }
 
    
-    char *resultats = g_strdup("");
+   
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         const unsigned char *ip = sqlite3_column_text(stmt, 1);
         const unsigned char *masque = sqlite3_column_text(stmt, 2);
@@ -306,15 +319,21 @@ char *lister_ip(bool graphique) {
 
 
 
-void recherche_par_masque() {
-    char masque_recherche[16];
+char * recherche_par_masque(const char *masque_recherche, bool graphique) {
+    
+    char *resultats = g_strdup("");
 
-    printf("Entrez le masque de sous-réseau : ");
-    scanf("%15s", masque_recherche);
+    if(graphique == false){
+
+        printf("Entrez le masque de sous-réseau : ");
+        scanf("%15s", masque_recherche);
+    }
+    
 
     if (!masque_valide(masque_recherche)) {
         printf("Masque invalide.\n");
-        return;
+        resultats = g_strdup("Masque invalide.");
+        return resultats;
     }
 
     sqlite3 *db;
@@ -325,7 +344,8 @@ void recherche_par_masque() {
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return;
+        resultats = g_strdup("Impossible d'ouvrir la base de données.");;
+        return  resultats;
     }
 
     const char *sql = "SELECT ip, ip_binaire, ip_hexa FROM ip_masque WHERE masque = ?";
@@ -333,13 +353,13 @@ void recherche_par_masque() {
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
-        return;
+        resultats = g_strdup("Erreur lors de la préparation de la requête.");;
+        return resultats;
     }
 
     sqlite3_bind_text(stmt, 1, masque_recherche, -1, SQLITE_STATIC);
 
-    printf("Adresses IP avec le masque %s :\n", masque_recherche);
-    printf("------------------------------------------------\n");
+    
 
     int adresse_trouvee = 0;
 
@@ -348,7 +368,17 @@ void recherche_par_masque() {
         const unsigned char *ip_binaire = sqlite3_column_text(stmt, 1); 
         const unsigned char *ip_hexa = sqlite3_column_text(stmt, 2); 
 
-        printf("IP: %s | IP Binaire: %s | IP Hexa: %s\n", ip, ip_binaire, ip_hexa);
+        if(graphique == false){
+            printf("Adresses IP avec le masque %s :\n", masque_recherche);
+            printf("------------------------------------------------\n");
+            printf("IP: %s | IP Binaire: %s | IP Hexa: %s\n", ip, ip_binaire, ip_hexa);
+
+        }
+        else{
+            resultats = g_strconcat(resultats,"Liste des adresses IP :\n","------------------------------------------------\n",
+                "IP: ", ip,"| Masque Binaire:",ip_binaire,"| IP Hexa:",ip_hexa,"\n", NULL);
+        }
+        
         
         adresse_trouvee = 1;
     }
@@ -358,28 +388,36 @@ void recherche_par_masque() {
 
     if (!adresse_trouvee) {
         printf("Aucune adresse IP associée à ce masque de sous-réseau.\n");
+         return g_strdup("Aucune adresse IP associée à ce masque de sous-réseau.\n");
     }
+    return resultats;
 }
 
 
 
-void supprimer_ip() {
-    char ip_a_supprimer[16];
-    char masque_a_supprimer[16];
+char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
 
-    printf("Entrez l'adresse IP à supprimer : ");
-    scanf("%15s", ip_a_supprimer);
-    printf("Entrez le masque à supprimer : ");
-    scanf("%15s", masque_a_supprimer);
+    char *resultats = g_strdup("");
 
-    if (!ip_valide(ip_a_supprimer) || !masque_valide(masque_a_supprimer)) {
-        printf("Adresse IP ou masque invalide.\n");
-        return;
+    if(graphique == false){
+
+        printf("Entrez l'adresse IP à supprimer : ");
+        scanf("%15s", ip);
+        printf("Entrez le masque à supprimer : ");
+        scanf("%15s", masque);
     }
 
-    if (!existe_dans_base(ip_a_supprimer, masque_a_supprimer)) {
+
+    if (!ip_valide(ip) || !masque_valide(masque)) {
+        printf("Adresse IP ou masque invalide.\n");
+        resultats = g_strdup("Adresse IP ou masque invalide.\n");
+        return resultats;
+    }
+
+    if (!existe_dans_base(ip, masque)) {
         printf("L'adresse IP et le masque spécifiés ne sont pas présents dans la base de données.\n");
-        return;
+        resultats = g_strdup("L'adresse IP et le masque spécifiés ne sont pas présents dans la base de données.\n");
+        return resultats;
     }
 
     sqlite3 *db;
@@ -389,6 +427,7 @@ void supprimer_ip() {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
+        resultats = g_strdup("Impossible d'ouvrir la base de données : %s\n");
     }
 
     const char *sql = "DELETE FROM ip_masque WHERE ip = ? AND masque = ?";
@@ -399,20 +438,24 @@ void supprimer_ip() {
         fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
+        resultats = g_strdup("Erreur lors de la préparation de la requête.\n");
     }
 
-    sqlite3_bind_text(stmt, 1, ip_a_supprimer, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, masque_a_supprimer, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, masque, -1, SQLITE_STATIC);
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
+        resultats = g_strdup("Erreur lors de l'exécution de la requête.\n");
     } else {
         printf("L'adresse IP et le masque ont été supprimés de la base de données.\n");
+        resultats = g_strdup("L'adresse IP et le masque ont été supprimés de la base de données.\n");
     }
 
     sqlite3_finalize(stmt);
     sqlite3_close(db);
+    return resultats;
 }
 
 
@@ -420,6 +463,9 @@ void menu(int argc, char *argv[]){
     creer_base_sql();
     char ip[16];
     char masque[16];
+    char masque_recherche[16];
+    char ip_a_supprimer[16];
+    char masque_a_supprimer[16];
     int b_interface = 1;
     char choix;
         do {
@@ -442,10 +488,10 @@ void menu(int argc, char *argv[]){
                     lister_ip(false);
                     break;
                 case 'r':
-                    recherche_par_masque();
+                    recherche_par_masque(masque_recherche,false);
                     break;
                 case 's':
-                    supprimer_ip();
+                    supprimer_ip(ip_a_supprimer,masque_a_supprimer,false);
                     break;
                 case 'g':
                     int b_interface  = menu_interface(argc, argv);
