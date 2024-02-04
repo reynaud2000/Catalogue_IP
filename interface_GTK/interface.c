@@ -117,28 +117,6 @@ const char *fenetre_input_masque(GtkWidget *widget, const char *data) {
     return NULL; 
 }
 
-void popup_erreur(){
-    
-    GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
-    dialog = gtk_dialog_new_with_buttons("Attention", NULL, flags,
-                                     "OK", GTK_RESPONSE_ACCEPT,NULL);
-    GtkWidget *label = gtk_label_new("Erreur de la saisi de l'adresse IP ou masque. Merci de le saisir sous forme X.X.X.X");
-    gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), label);
-
-    // Affiche tout
-    gtk_widget_show_all(dialog);
-
-    // Traitement de la réponse
-     gint response = gtk_dialog_run(GTK_DIALOG(dialog));
-
-    if (response == GTK_RESPONSE_ACCEPT) {
-
-            gtk_widget_destroy(dialog);
-    }
-
-
-}
-
 void recherche_via_masque(GtkWidget *widget){
 
     const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
@@ -158,27 +136,16 @@ void suppression_ip(GtkWidget *widget) {
     }
 }
 
-
-void popup_ajout_base(){
+void ajout_ip(GtkWidget *widget) {
     
-    GtkDialogFlags flags = GTK_DIALOG_MODAL | GTK_DIALOG_DESTROY_WITH_PARENT;
-    dialog = gtk_dialog_new_with_buttons("Confirmation", NULL, flags,
-                                     "OK", GTK_RESPONSE_ACCEPT,NULL);
-    GtkWidget *label = gtk_label_new("L'adresse et le masque on bien été ajouté dans la base de donnée");
-    gtk_container_add(GTK_CONTAINER(gtk_dialog_get_content_area(GTK_DIALOG(dialog))), label);
-
-    // Affiche tout
-    gtk_widget_show_all(dialog);
-
-    // Traitement de la réponse
-     gint response = gtk_dialog_run(GTK_DIALOG(dialog));
-
-    if (response == GTK_RESPONSE_ACCEPT) {
-
-            gtk_widget_destroy(dialog);
-    }
-
+    const char *ip_address = fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+    const char *masque = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
+    affiche_liste(ajouter_ip(ip_address, masque, true));
+    free((void *)ip_address);
+    free((void *)masque);
 }
+
+
 
 void affiche_liste(char *resultats) {
     GtkWidget *window, *label;
@@ -194,7 +161,6 @@ void affiche_liste(char *resultats) {
     if (response == GTK_RESPONSE_ACCEPT) {
         gtk_widget_destroy(window);
     }
-    
 }
 
 
@@ -216,28 +182,9 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
         // Vérifie si le boutton Ajouter une adresse est cliqué
 
         if ((x >= 187 && x <= 480) && (y >= 221 && y <= 314)) {
-            int add_ip = 0;
-            // appelle la fonction fenetre_input_adresse_ip pour ouvrir une popup permmettant à l'utilisateur d'écrire.
-            while (add_ip != 1)
-            {
-                const char *ip_address = fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
-                const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
-                add_ip = ajouter_ip(ip_address, masque, true);
-                if(add_ip != 1){
-                    popup_erreur();
-                }
-                else if (ip_address == NULL || masque == NULL)
-                {
-                    add_ip = 1;
-                }
-                
-                free((void *)ip_address);
-                free((void *)masque);
+                ajout_ip(widget);
             }
-            popup_ajout_base();
-        }
             
-
         if ((x >= 537 && x <= 826) && (y >= 221 && y <= 314)) {
             suppression_ip(widget);
         }

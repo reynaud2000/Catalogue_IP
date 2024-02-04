@@ -22,5 +22,5 @@ void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gcha
 int menu_interface(int argc, char *argv[]);
 void affiche_liste(char *resultats);
 void suppression_ip(GtkWidget *widget);
-void popup_ajout_base();
+void ajout_ip(GtkWidget *widget);
 #endif // INTERFACE_H
