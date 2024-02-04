@@ -8,7 +8,7 @@ int ip_valide(const char *ip);
 int existe_dans_base(const char *ip, const char *masque);
 void convertir_en_binaire(const char *adresse_ip, char *adresse_ip_binaire);
 void convertir_en_hexa(const char *adresse_ip, char *adresse_ip_hexa);
-int ajouter_ip(const char *ip, const char *masque, bool graphique);
+char * ajouter_ip(const char *ip, const char *masque, bool graphique);
 char *lister_ip(bool graphique);
 int masque_similaire(const char *ip1, const char *ip2, const char *masque);
 char * recherche_par_masque(const char *masque_recherche, bool graphique);

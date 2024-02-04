@@ -134,7 +134,10 @@ void convertir_en_hexa(const char *adresse_ip, char *adresse_ip_hexa) {
     sprintf(adresse_ip_hexa, "%02X.%02X.%02X.%02X", octets[0], octets[1], octets[2], octets[3]);
 }
 
-int ajouter_ip(const char *ip, const char *masque, bool graphique) {
+char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
+
+    char *resultats = g_strdup("");
+
     if (graphique == false) {
         printf("Entrez une adresse IP : ");
         scanf("%15s", ip);
@@ -144,12 +147,14 @@ int ajouter_ip(const char *ip, const char *masque, bool graphique) {
 
     if (!ip_valide(ip) || !masque_valide(masque)) {
         printf("Adresse IP ou masque invalide.\n");
-        return 0;
+        resultats = g_strdup("Adresse IP ou masque invalide.\n");
+        return resultats ;
     }
 
     if (existe_dans_base(ip, masque)) {
         printf("L'adresse IP et le masque sont déjà présents dans la base.\n");
-        return 1;
+        resultats = g_strdup("L'adresse IP et le masque sont déjà présents dans la base.\n");
+        return resultats ;
     }
 
     char ip_hexa[16];
@@ -165,6 +170,8 @@ int ajouter_ip(const char *ip, const char *masque, bool graphique) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
+        resultats = g_strdup("Impossible d'ouvrir la base de données.\n");
+        return resultats ;
     }
 
     char ip_binaire[36];
@@ -181,6 +188,8 @@ int ajouter_ip(const char *ip, const char *masque, bool graphique) {
         fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
+        resultats = g_strdup("Erreur lors de la préparation de la requête.\n");
+        return resultats ;
     }
 
     sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
@@ -193,13 +202,17 @@ int ajouter_ip(const char *ip, const char *masque, bool graphique) {
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
+        resultats = g_strdup("Erreur lors de l'exécution de la requête .\n");
+        return resultats ;
     } else {
         printf("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
+        resultats = g_strdup("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
+        return resultats;
     }
 
     sqlite3_finalize(stmt);
     sqlite3_close(db);
-    return 1;
+    return resultats;
 }
 
 int existe_dans_base(const char *ip, const char *masque) {
@@ -367,7 +380,6 @@ char * recherche_par_masque(const char *masque_recherche, bool graphique) {
     }
     return resultats;
 }
-
 
 
 char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
