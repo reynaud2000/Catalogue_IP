@@ -1,5 +1,5 @@
 #include "catalogue_ip.h"
-#include "../interface_GTK/interface.h"
+#include "../Interface/interface.h"
 
 /**
  * Fonction principale du programme.

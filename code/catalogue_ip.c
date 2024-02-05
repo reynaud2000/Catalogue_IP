@@ -6,7 +6,7 @@
 #include <sqlite3.h>
 #define DB_PATH "catalogue_ip.db"
 #include "catalogue_ip.h"
-#include "../interface_GTK/interface.h"
+#include "../Interface/interface.h"
 
 /**
  * Vérifie si un masque de sous-réseau est valide en le comparant à une liste de masques valides.
