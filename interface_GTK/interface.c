@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include "interface.h"
-#include "../project_with_sql/catalogue_ip.h"
+#include "../code/catalogue_ip.h"
 
 GtkWidget *window = NULL;
 GtkWidget *fixed = NULL;
