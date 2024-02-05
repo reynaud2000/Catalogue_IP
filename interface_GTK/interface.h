@@ -1,19 +1,15 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
-
 #include <gtk/gtk.h>
 #include <pango/pangocairo.h>
 #include <stdio.h>
 
-// Déclarer les variables globales
 extern GtkWidget *window;
 extern GtkWidget *fixed;
 extern GtkWidget *label;
 extern GtkWidget *dialog;
 extern GtkWidget *content_area;
 extern GtkWidget *entry;
-
-// Déclarer les fonctions
 
 const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data);
 const char *fenetre_input_masque(GtkWidget *widget, const char *data);
@@ -23,4 +19,5 @@ int menu_interface(int argc, char *argv[]);
 void affiche_liste(char *resultats);
 void suppression_ip(GtkWidget *widget);
 void ajout_ip(GtkWidget *widget);
-#endif // INTERFACE_H
+
+#endif 
