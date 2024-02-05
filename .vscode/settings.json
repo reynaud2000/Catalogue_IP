@@ -2,7 +2,8 @@
     "files.associations": {
         "gtk.h": "c",
         "pangocairo.h": "c",
-        "catalogue_ip.h": "c"
+        "catalogue_ip.h": "c",
+        "interface.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
