@@ -39,7 +39,7 @@ quit
 ```
 gcc -c ../Interface/interface.c -o interface.o $(pkg-config --cflags gtk+-3.0)
 gcc -c catalogue_ip.c -o catalogue_ip.o $(pkg-config --cflags gtk+-3.0) -lsqlite3
-gcc -c main.c -o main.o $(pkg-config--cflags gtk+-3.0)
+gcc -c main.c -o main.o $(pkg-config --cflags gtk+-3.0)
 gcc catalogue_ip.o interface.o main.o -o catalogue_ip $(pkg-config --libs gtk+-3.0) -lsqlite3
 ```
 2. Puis exécuter avec cette commande : 

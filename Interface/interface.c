@@ -152,7 +152,6 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     if (event->type == GDK_BUTTON_PRESS) {
         gint x, y;
         gtk_widget_translate_coordinates(widget, GTK_WIDGET(gtk_widget_get_toplevel(widget)), event->x, event->y, &x, &y);
-        printf("%d %d\n",x,y);
         if ((x >= 187 && x <= 480) && (y >= 221 && y <= 314)) {
                 ajout_ip(widget);
             }     
