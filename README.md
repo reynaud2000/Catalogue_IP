@@ -43,9 +43,9 @@ gcc -c main.c -o main.o $(pkg-config--cflags gtk+-3.0)
 gcc catalogue_ip.o interface.o main.o -o catalogue_ip $(pkg-config --libs gtk+-3.0) -lsqlite3
 ```
 2. Puis exécuter avec cette commande : 
-
+```
 ./catalogue_ip
-
+```
 # IP C-atalogue
 
 Vous allez créer un utilitaire permettant de cataloguer les adresses IP(v4).
