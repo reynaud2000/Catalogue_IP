@@ -321,7 +321,7 @@ char *lister_ip(bool graphique) {
 
             resultats = g_strconcat(resultats,"Liste des adresses IP :\n","------------------------------------------------\n",
                  "IP: ", ip, " | Masque: ", masque,
-                "| Masque Binaire:",ip_binaire, "| Masque Binaire:",masque_binaire, "| IP Hexa:",ip_hexa,
+                "| IP Binaire:",ip_binaire, "| Masque Binaire:",masque_binaire, "| IP Hexa:",ip_hexa,
                 "| Masque Hexa:",masque_hexa, "\n", NULL);
         }
         else{
