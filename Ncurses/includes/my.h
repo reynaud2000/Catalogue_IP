@@ -1,0 +1,51 @@
+#include <stdio.h>
+// #include <gtk/gtk.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <sqlite3.h>
+#include <ncurses.h>
+#define DB_PATH "catalogue_ip.db"
+
+// #include "catalogue_ip.h"
+// #include "../Interface/interface.h"
+
+typedef struct element
+{
+    // char *val;
+    char *Ip;
+    char *Mask;
+    char *IpNetwork;
+    char *binary_Ip;
+    char *Hex_Ip;
+    struct element *nxt;
+}element, *listAdr;
+
+listAdr addDataLst(listAdr myLst, char *Ip, char *Mask, char * Ipbin, char *Iphex);
+void displaylist(listAdr myLst);
+void freeList(listAdr myLst);
+listAdr load_Sql_In_List(listAdr myLst);
+listAdr deleteDataLst(listAdr myLst, char *Ip, char *Mask);
+char *get(void);
+void help();
+void bad_command();
+void creer_base_sql();
+void Loop_Menu(listAdr myLst);
+char **my_str_to_word_array(char const *str);
+int my_strlen(char const *str);
+int number(char const *str);
+void free_2d_array(char **tab);
+char *getIpNetwork(char *ip, char *mask);
+char* ip_to_hex(char *ip);
+char* ip_to_binary(char *ip);
+void ajouter_ip(const char *ip, const char *masque, bool graphique);
+void supprimer_ip(const char *ip, const char *masque, bool graphique);
+listAdr launchNurcuses(char *name, listAdr myLst);
+void TextColored(WINDOW *win, int x, int y, char *text, int color);
+listAdr addIp(listAdr myLst, char *ip, char *mask);
+listAdr deleteIP(listAdr myLst, char *ip, char *mask);
+bool validData(char *ip, char *mask, char *line);
+void filterLst(listAdr myLst, char *Ip, char *Mask);
+int number(char const *str);
+bool AlreadyExistLst(listAdr myLst, char *Ip, char *Mask);
+bool validData_ncurses(char *ip, char *mask, char *line, WINDOW *win);
