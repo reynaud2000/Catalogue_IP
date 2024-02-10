@@ -71,9 +71,9 @@ void supprimer_ip_ncurses(const char *ip, const char *masque, WINDOW *win) {
     sqlite3_bind_text(stmt, 2, masque, -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE)
-        TextColored(win, 4, 40, "L'adresse IP et le masque ont été ajoutés à la base de données.", 2);
+        TextColored(win, 4, 40, "L'adresse IP et le masque ont été ajoutes à la base de données.", 2);
     else
-        TextColored(win, 4, 40, "L'adresse IP et le masque ont été supprimés de la base de données.\n", 2);
+        TextColored(win, 4, 40, "L'adresse IP et le masque ont été supprimes de la base de données.\n", 2);
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
@@ -113,7 +113,7 @@ listAdr addDataLst_ncurses(listAdr myLst, char *Ip, char *Mask, char * Ipbin, ch
     new_lst->Hex_Ip = strdup(Iphex);
     // new_lst->IpNetwork = getIpNetwork(Ip, Mask);
     new_lst->nxt = myLst;
-    TextColored(win, 6, 40, "L'adresse IP a été ajoutée avec succès", 1);
+    TextColored(win, 6, 40, "L'adresse IP a ete ajoutee avec succes", 1);
     return new_lst;
 }
 

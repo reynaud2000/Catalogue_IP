@@ -1,18 +1,15 @@
 #include <stdio.h>
-// #include <gtk/gtk.h>
+#include <gtk/gtk.h>
 #include <string.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <sqlite3.h>
 #include <ncurses.h>
+#include <pango/pangocairo.h>
 #define DB_PATH "catalogue_ip.db"
-
-// #include "catalogue_ip.h"
-// #include "../Interface/interface.h"
 
 typedef struct element
 {
-    // char *val;
     char *Ip;
     char *Mask;
     char *IpNetwork;
@@ -38,8 +35,8 @@ void free_2d_array(char **tab);
 char *getIpNetwork(char *ip, char *mask);
 char* ip_to_hex(char *ip);
 char* ip_to_binary(char *ip);
-void ajouter_ip(const char *ip, const char *masque, bool graphique);
-void supprimer_ip(const char *ip, const char *masque, bool graphique);
+char * ajouter_ip(const char *ip, const char *masque, bool graphique);
+char *supprimer_ip(const char *ip, const char *masque, bool graphique);
 listAdr launchNurcuses(char *name, listAdr myLst);
 void TextColored(WINDOW *win, int x, int y, char *text, int color);
 listAdr addIp(listAdr myLst, char *ip, char *mask);
@@ -49,3 +46,7 @@ void filterLst(listAdr myLst, char *Ip, char *Mask);
 int number(char const *str);
 bool AlreadyExistLst(listAdr myLst, char *Ip, char *Mask);
 bool validData_ncurses(char *ip, char *mask, char *line, WINDOW *win);
+int menu_interface();
+bool verifyNumberMask(int number);
+bool verifyNumberIP(int number);
+bool validData_interface(char *ip, char *mask);

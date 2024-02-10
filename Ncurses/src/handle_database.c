@@ -59,23 +59,24 @@ listAdr load_Sql_In_List(listAdr myLst) {
     return myLst;
 }
 
-void ajouter_ip(const char *ip, const char *masque, bool graphique) {
-    char *ip_binaire, *ip_hexa;
+char *ajouter_ip(const char *ip, const char *masque, bool graphique) {
+    char *resultats = g_strdup("");
     sqlite3 *db;
     int rc;
     const char *sql_request;
 
-    // if (graphique == false) {
-    //     printf("Entrez une adresse IP : ");
-    //     scanf("%15s", ip);
-    //     printf("Entrez un masque : ");
-    //     scanf("%15s", masque);
-    // }
+    if (validData_interface((char *) ip, (char *) masque) == false && graphique == true) {
+        resultats = g_strdup("les données sont incorrect");
+        return resultats;
+    }
+
     rc = sqlite3_open(DB_PATH, &db);
     if (rc) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
+        resultats = g_strdup("Impossible d'ouvrir la base de données.\n");
+        return resultats ;
     }
     sql_request = "INSERT INTO ip_masque (ip, masque, ip_binaire, ip_hexa) VALUES (?, ?, ?, ?);";
     sqlite3_stmt *stmt;
@@ -84,18 +85,27 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
         fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
+        resultats = g_strdup("Erreur lors de la préparation de la requête.\n");
+        return resultats ;
     }
     sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, masque, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, ip_to_binary((char *)ip), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 4, ip_to_hex((char *)ip), -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE)
+    if (rc != SQLITE_DONE) {
         fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
-    else
+        resultats = g_strdup("Erreur lors de l'exécution de la requête .\n");
+        return resultats ;
+    }
+    else {
         printf("\033[0;32mL'adresse IP et le masque ont été ajoutés à la base de données.\033[0m\n");
+        resultats = g_strdup("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
+        return resultats;
+    }
     sqlite3_finalize(stmt);
     sqlite3_close(db);
+    return resultats;
 }
 
 /**
@@ -107,25 +117,24 @@ void ajouter_ip(const char *ip, const char *masque, bool graphique) {
  *         En cas d'erreur, renvoie un message explicatif.
  *         La mémoire allouée est libérée après utilisation.
  */
-void supprimer_ip(const char *ip, const char *masque, bool graphique) {
+char *supprimer_ip(const char *ip, const char *masque, bool graphique) {
 
-    // char *resultats = g_strdup("");
-
-    // if(graphique == false){
-
-    //     printf("Entrez l'adresse IP à supprimer : ");
-    //     scanf("%15s", ip);
-    //     printf("Entrez le masque à supprimer : ");
-    //     scanf("%15s", masque);
-    // }
+    char *resultats = g_strdup("");
     sqlite3 *db;
     int rc;
     rc = sqlite3_open(DB_PATH, &db);
+
+    if (validData_interface((char *) ip, (char *) masque) == false && graphique == true) {
+        resultats = g_strdup("les données sont incorrect");
+        return resultats;
+    }
+
     if (rc) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
-        // resultats = g_strdup("Impossible d'ouvrir la base de données : %s\n");
+        resultats = g_strdup("Impossible d'ouvrir la base de données : %s\n");
+        return resultats;
     }
 
     const char *sql = "DELETE FROM ip_masque WHERE ip = ? AND masque = ?";
@@ -136,7 +145,8 @@ void supprimer_ip(const char *ip, const char *masque, bool graphique) {
         fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);
         exit(1);
-        // resultats = g_strdup("Erreur lors de la préparation de la requête.\n");
+        resultats = g_strdup("Erreur lors de la préparation de la requête.\n");
+        return resultats;
     }
 
     sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
@@ -145,13 +155,15 @@ void supprimer_ip(const char *ip, const char *masque, bool graphique) {
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
         fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
-        // resultats = g_strdup("Erreur lors de l'exécution de la requête.\n");
+        resultats = g_strdup("Erreur lors de l'exécution de la requête.\n");
+        return resultats;
     } else {
         printf("\033[0;32mL'adresse IP et le masque ont été supprimés de la base de données.\033[0m\n");
-        // resultats = g_strdup("L'adresse IP et le masque ont été supprimés de la base de données.\n");
+        resultats = g_strdup("L'adresse IP et le masque ont été supprimés de la base de données.\n");
+        return resultats;
     }
 
     sqlite3_finalize(stmt);
     sqlite3_close(db);
-    // return resultats;
+    return resultats;
 }

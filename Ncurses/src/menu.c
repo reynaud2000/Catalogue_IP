@@ -1,5 +1,6 @@
 #include "../includes/my.h"
 
+
 void Loop_Menu(listAdr myLst) {
     creer_base_sql();
     myLst = load_Sql_In_List(myLst);
@@ -43,6 +44,9 @@ void Loop_Menu(listAdr myLst) {
         else if (strcmp(command_line[0], "ncurses") == 0)
             myLst = launchNurcuses(name, myLst);
         else if (strcmp(command_line[0], "gtk") == 0) {
+            menu_interface();
+            myLst = NULL;
+            myLst = load_Sql_In_List(myLst);
         }
         else
             bad_command();

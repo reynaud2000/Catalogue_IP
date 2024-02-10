@@ -1,11 +1,11 @@
-SRC	=	src/main.c	\
-		src/menu.c	\
-		src/list.c	\
-		src/utils.c	\
-		src/command.c	\
-		src/handle_database.c	\
-		src/convert.c	\
-		src/ncurses.c
+SRC	=	src/*.c
+	# src/menu.c	\
+	# src/list.c	\
+	# src/utils.c	\
+	# src/command.c	\
+	# src/handle_database.c	\
+	# src/convert.c	\
+	# src/ncurses.c
 
 # PTESTS	=	src/my_putstr.c	\
 		src/my_strcmp.c \
@@ -23,7 +23,7 @@ NAME	=	catalogue_ip
 all:	$(NAME)
 
 $(NAME):	$(OBJ)
-	gcc -o $(NAME) $(SRC) -lm -lsqlite3 -g3 -lncurses $(pkg-config --cflags gtk+-3.0) -g
+	gcc -o $(NAME) $(SRC) $(pkg-config --cflags --libs gtk+-3.0) -lm -lsqlite3 -g3 -lncurses -g
 
 clean:
 	rm -f $(OBJ)
