@@ -20,7 +20,21 @@
     ```
         sudo apt-get install libpango1.0-dev libcairo2-dev
     ```
+4. Installer GDB:
 
+ ```
+       sudo apt-get install gdb
+ ```
+5. Installer Nscurses:
+
+   ```
+     sudo apt-get install libncurses5-dev libncursesw5-dev
+   ```
+6. Installer MySQL pour C :
+
+   ```
+     sudo apt-get install libmysqlcppconn-dev
+   ```
 # Pour exécuter le code
 
 1. A faire dans le dossier "code" : 
