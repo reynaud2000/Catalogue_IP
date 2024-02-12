@@ -23,25 +23,11 @@
 
 # Pour exécuter le code
 
-1. A faire dans le dossier "code" : 
+1. A faire dans le dossier "Code" : 
 ```
-gcc -c ../Interface/interface.c -o interface.o $(pkg-config --cflags gtk+-3.0) -g
-gcc -c catalogue_ip.c -o catalogue_ip.o $(pkg-config --cflags gtk+-3.0) -lsqlite3 -g
-gcc -c main.c -o main.o $(pkg-config --cflags gtk+-3.0) -g
+gcc -o catalogue_ip src/*.c $(pkg-config --cflags --libs gtk+-3.0) -lm -lsqlite3 -g3 -lncurses -g
 ```
 
-```
-gcc catalogue_ip.o interface.o main.o -o catalogue_ip $(pkg-config --libs gtk+-3.0) -lsqlite3
-gdb ./catalogue_ip
-quit
-```
-
-```
-gcc -c ../Interface/interface.c -o interface.o $(pkg-config --cflags gtk+-3.0)
-gcc -c catalogue_ip.c -o catalogue_ip.o $(pkg-config --cflags gtk+-3.0) -lsqlite3
-gcc -c main.c -o main.o $(pkg-config --cflags gtk+-3.0)
-gcc catalogue_ip.o interface.o main.o -o catalogue_ip $(pkg-config --libs gtk+-3.0) -lsqlite3
-```
 2. Puis exécuter avec cette commande : 
 ```
 ./catalogue_ip
