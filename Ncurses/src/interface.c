@@ -153,11 +153,16 @@ char *filtered_mask(bool graphique, const char *ip_add, const char *mask) {
     int rc;
     char *resultats = g_strdup("");
 
-    if (validData_interface((char *) ip_add, (char *)mask) == false) {
-        resultats = g_strdup("les données sont incorrect");
+
+    if (validData_interface((char *) ip_add, (char *) mask) == 0) {
+        resultats = g_strdup("Vous devez entrer une IP et un MASQUE.");
         return resultats;
     }
 
+    if (validData_interface((char *) ip_add, (char *) mask) == false) {
+        resultats = g_strdup("Merci de rentrer un masque ou une ip valide en X.X.X.X");
+        return resultats;
+    }
     rc = sqlite3_open(DB_PATH, &db);
     if (rc != SQLITE_OK) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
@@ -243,7 +248,6 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     if (event->type == GDK_BUTTON_PRESS) {
         gint x, y;
         gtk_widget_translate_coordinates(widget, GTK_WIDGET(gtk_widget_get_toplevel(widget)), event->x, event->y, &x, &y);
-        g_print("x= %d;  y= %d\n", x, y);
         if ((x >= 187 && x <= 480) && (y >= 221 && y <= 314)) {
             ajout_ip(widget);
         }     

@@ -60,14 +60,36 @@ listAdr load_Sql_In_List(listAdr myLst) {
 }
 
 char *ajouter_ip(const char *ip, const char *masque, bool graphique) {
+    WINDOW *win;
     char *resultats = g_strdup("");
     sqlite3 *db;
     int rc;
     const char *sql_request;
 
-    if (validData_interface((char *) ip, (char *) masque) == false && graphique == true) {
-        resultats = g_strdup("les données sont incorrect");
+    if (validData_interface((char *) ip, (char *) masque) == 0) {
+        if(graphique){
+            resultats = g_strdup("Vous devez entrer une IP et un MASQUE.");
+            return resultats;
+        }
+        else{
+
+            TextColored(win, 4, 40, "Vous devez entrer une IP et un MASQUE.", 2);
+
+        }
+        
+    }
+
+    if (validData_interface((char *) ip, (char *) masque) == false) {
+
+        if(graphique){
+        resultats = g_strdup("Merci de rentrer un masque ou une ip valide en X.X.X.X");
         return resultats;
+        }
+        else{
+
+            TextColored(win, 4, 40, "Merci de rentrer un masque ou une ip valide en X.X.X.X", 2);
+
+        }
     }
 
     rc = sqlite3_open(DB_PATH, &db);
@@ -124,11 +146,15 @@ char *supprimer_ip(const char *ip, const char *masque, bool graphique) {
     int rc;
     rc = sqlite3_open(DB_PATH, &db);
 
-    if (validData_interface((char *) ip, (char *) masque) == false && graphique == true) {
-        resultats = g_strdup("les données sont incorrect");
+    if (validData_interface((char *) ip, (char *) masque) == 0 && graphique == true) {
+        resultats = g_strdup("Vous devez entrer une IP et un MASQUE.");
         return resultats;
     }
 
+    if (validData_interface((char *) ip, (char *) masque) == false && graphique == true) {
+        resultats = g_strdup("Merci de rentrer un masque ou une ip valide en X.X.X.X");
+        return resultats;
+    }
     if (rc) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
         sqlite3_close(db);

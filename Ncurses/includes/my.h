@@ -1,3 +1,6 @@
+#ifndef MY_H
+#define MY_H
+
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <string.h>
@@ -8,6 +11,12 @@
 #include <pango/pangocairo.h>
 #define DB_PATH "catalogue_ip.db"
 
+extern GtkWidget *window;
+extern GtkWidget *fixed;
+extern GtkWidget *label;
+extern GtkWidget *dialog;
+extern GtkWidget *content_area;
+extern GtkWidget *entry;
 typedef struct element
 {
     char *Ip;
@@ -50,3 +59,5 @@ int menu_interface();
 bool verifyNumberMask(int number);
 bool verifyNumberIP(int number);
 bool validData_interface(char *ip, char *mask);
+
+#endif 

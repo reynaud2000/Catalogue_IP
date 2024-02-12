@@ -45,6 +45,7 @@ void ajouter_ip_ncurses(const char *ip, const char *masque, WINDOW *win) {
         TextColored(win, 4, 40, "Erreur lors de l'exécution de la requête", 2);
     else
         TextColored(win, 4, 40, "L'adresse IP et le masque ont été ajoutés à la base de données.", 2);
+    
     sqlite3_finalize(stmt);
     sqlite3_close(db);
 }
