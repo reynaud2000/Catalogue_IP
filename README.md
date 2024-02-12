@@ -37,8 +37,9 @@
    ```
 # Pour exécuter le code
 
-1. A faire dans le dossier "code" : 
-
+1. A faire dans le dossier "code" :
+   
+```
 gcc -o catalogue_ip src/*.c $(pkg-config --cflags --libs gtk+-3.0) -lm -lsqlite3 -g3 -lncurses -g
 ```
 
