@@ -15,7 +15,6 @@
  * @return int 1 si le masque est valide, 0 sinon.
  */
 int masque_valide(const char *masque) {
-    
       if (masque == NULL) {
         printf("ERREUR : Chaîne d'adresse IP NULL\n");
         return 0;
@@ -102,12 +101,12 @@ int ip_valide(const char *ip) {
  * Si la table existe déjà, elle ne sera pas recréée.
  */
 void creer_base_sql() {
-    sqlite3 *db;
-    int rc;
-    rc = sqlite3_open(DB_PATH, &db);
-    if (rc) {
-        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    sqlite3 *base_sql;
+    int resultats;
+    resultats = sqlite3_open(DB_PATH, &base_sql);
+    if (resultats) {
+        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         exit(1);
     }
     const char *sql = "CREATE TABLE IF NOT EXISTS ip_masque ("
@@ -120,13 +119,13 @@ void creer_base_sql() {
                       "masque_hexa VARCHAR(10) NOT NULL"
                       ");";
 
-    rc = sqlite3_exec(db, sql, NULL, 0, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erreur lors de la création de la table : %s\n", sqlite3_errmsg(db));
+    resultats = sqlite3_exec(base_sql, sql, NULL, 0, NULL);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Erreur lors de la création de la table : %s\n", sqlite3_errmsg(base_sql));
     } else {
         printf("La base de données a été créée avec succès.\n");
     }
-    sqlite3_close(db);
+    sqlite3_close(base_sql);
 }
 
 /**
@@ -193,12 +192,13 @@ char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
     char masque_hexa[16];
     convertir_en_hexa(ip, ip_hexa);
     convertir_en_hexa(masque, masque_hexa);
-    sqlite3 *db;
-    int rc;
-    rc = sqlite3_open(DB_PATH, &db);
-    if (rc) {
-        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    sqlite3 *base_sql;
+    int resultats;
+    resultats = sqlite3_open(DB_PATH, &base_sql);
+
+    if (resultats) {
+        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         exit(1);
         resultats = g_strdup("Impossible d'ouvrir la base de données.\n");
         return resultats ;
@@ -207,25 +207,25 @@ char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
     char masque_binaire[36];
     convertir_en_binaire(ip, ip_binaire);
     convertir_en_binaire(masque, masque_binaire);
-    const char *sql = "INSERT INTO ip_masque (ip, masque, ip_binaire, masque_binaire, ip_hexa, masque_hexa) VALUES (?, ?, ?, ?, ?, ?);";
-    sqlite3_stmt *stmt;
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    const char *requete_sql = "INSERT INTO ip_masque (ip, masque, ip_binaire, masque_binaire, ip_hexa, masque_hexa) VALUES (?, ?, ?, ?, ?, ?);";
+    sqlite3_stmt *instruction;
+    resultats = sqlite3_prepare_v2(base_sql, requete_sql, -1, &instruction, NULL);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         exit(1);
         resultats = g_strdup("Erreur lors de la préparation de la requête.\n");
         return resultats ;
     }
-    sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, masque, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, ip_binaire, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, masque_binaire, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 5, ip_hexa, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 6, masque_hexa, -1, SQLITE_STATIC);
-    rc = sqlite3_step(stmt);
-    if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
+    sqlite3_bind_text(instruction, 1, ip, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 2, masque, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 3, ip_binaire, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 4, masque_binaire, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 5, ip_hexa, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 6, masque_hexa, -1, SQLITE_STATIC);
+    resultats = sqlite3_step(instruction);
+    if (resultats != SQLITE_DONE) {
+        fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(base_sql));
         resultats = g_strdup("Erreur lors de l'exécution de la requête .\n");
         return resultats ;
     } else {
@@ -233,8 +233,8 @@ char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
         resultats = g_strdup("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
         return resultats;
     }
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    sqlite3_finalize(instruction);
+    sqlite3_close(base_sql);
     return resultats;
 }
 
@@ -245,37 +245,37 @@ char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
  * @return 1 si l'adresse IP et le masque existent dans la base de données, 0 sinon, -1 en cas d'erreur.
  */
 int existe_dans_base(const char *ip, const char *masque) {
-    sqlite3 *db;
-    sqlite3_stmt *stmt;
-    int rc;
+    sqlite3 *base_sql;
+    sqlite3_stmt *instruction;
+    int resultats;
 
-    rc = sqlite3_open(DB_PATH, &db);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    resultats = sqlite3_open(DB_PATH, &base_sql);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         return -1;
     }
 
     const char *sql = "SELECT COUNT(*) FROM ip_masque WHERE ip = ? AND masque = ?";
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    resultats = sqlite3_prepare_v2(base_sql, sql, -1, &instruction, NULL);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         return -1;
     }
 
-    sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, masque, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 1, ip, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 2, masque, -1, SQLITE_STATIC);
 
-    int count = 0;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        count = sqlite3_column_int(stmt, 0);
+    int compteur = 0;
+    if (sqlite3_step(instruction) == SQLITE_ROW) {
+        compteur = sqlite3_column_int(instruction, 0);
     }
 
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    sqlite3_finalize(instruction);
+    sqlite3_close(base_sql);
 
-    return (count > 0);
+    return (compteur > 0);
 }
 
 /**
@@ -286,37 +286,34 @@ int existe_dans_base(const char *ip, const char *masque) {
  *         La mémoire allouée doit être libérée après utilisation.
  */
 char *lister_ip(bool graphique) {
-    sqlite3 *db;
-    sqlite3_stmt *stmt;
-    int rc;
+    sqlite3 *base_sql;
+    sqlite3_stmt *instruction;
+    int resultats;
      char *resultats = g_strdup("");
 
-    rc = sqlite3_open(DB_PATH, &db);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    resultats = sqlite3_open(DB_PATH, &base_sql);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         resultats = g_strdup("Impossible d'ouvrir la base de données");
         return resultats;
     }
 
     const char *sql = "SELECT * FROM ip_masque";
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    resultats = sqlite3_prepare_v2(base_sql, sql, -1, &instruction, NULL);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         resultats = g_strdup("Erreur lors de la préparation de la requête");
         return resultats;
     }
-
-   
-   
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        const unsigned char *ip = sqlite3_column_text(stmt, 1);
-        const unsigned char *masque = sqlite3_column_text(stmt, 2);
-        const unsigned char *ip_binaire = sqlite3_column_text(stmt, 3);
-        const unsigned char *masque_binaire = sqlite3_column_text(stmt, 4);
-        const unsigned char *ip_hexa = sqlite3_column_text(stmt, 5);
-        const unsigned char *masque_hexa = sqlite3_column_text(stmt, 6);
+    while (sqlite3_step(instruction) == SQLITE_ROW) {
+        const unsigned char *ip = sqlite3_column_text(instruction, 1);
+        const unsigned char *masque = sqlite3_column_text(instruction, 2);
+        const unsigned char *ip_binaire = sqlite3_column_text(instruction, 3);
+        const unsigned char *masque_binaire = sqlite3_column_text(instruction, 4);
+        const unsigned char *ip_hexa = sqlite3_column_text(instruction, 5);
+        const unsigned char *masque_hexa = sqlite3_column_text(instruction, 6);
         if(graphique){
 
             resultats = g_strconcat(resultats,"Liste des adresses IP :\n","------------------------------------------------\n",
@@ -333,9 +330,9 @@ char *lister_ip(bool graphique) {
 
         }
     }
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
-    
+    sqlite3_finalize(instruction);
+    sqlite3_close(base_sql);
+
     return resultats;
 }
 
@@ -348,7 +345,9 @@ char *lister_ip(bool graphique) {
  *         La mémoire allouée est libérée après utilisation.
  */
 char * recherche_par_masque(const char *masque_recherche, bool graphique) {
-    
+    sqlite3 *base_sql;
+    sqlite3_stmt *instruction;
+    int resultats;
     char *resultats = g_strdup("");
 
     if(graphique == false){
@@ -360,32 +359,30 @@ char * recherche_par_masque(const char *masque_recherche, bool graphique) {
         resultats = g_strdup("Masque invalide.");
         return resultats;
     }
-    sqlite3 *db;
-    sqlite3_stmt *stmt;
-    int rc;
-    rc = sqlite3_open(DB_PATH, &db);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+
+    resultats = sqlite3_open(DB_PATH, &base_sql);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         resultats = g_strdup("Impossible d'ouvrir la base de données.");;
         return  resultats;
     }
-    const char *sql = "SELECT ip, ip_binaire, ip_hexa FROM ip_masque WHERE masque = ?";
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+    const char *requete_sql = "SELECT ip, ip_binaire, ip_hexa FROM ip_masque WHERE masque = ?";
+    resultats = sqlite3_prepare_v2(base_sql, requete_sql, -1, &instruction, NULL);
+    if (resultats != SQLITE_OK) {
+        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         resultats = g_strdup("Erreur lors de la préparation de la requête.");;
         return resultats;
     }
-    sqlite3_bind_text(stmt, 1, masque_recherche, -1, SQLITE_STATIC);
+    sqlite3_bind_text(instruction, 1, masque_recherche, -1, SQLITE_STATIC);
 
     int adresse_trouvee = 0;
 
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        const unsigned char *ip = sqlite3_column_text(stmt, 0);
-        const unsigned char *ip_binaire = sqlite3_column_text(stmt, 1);
-        const unsigned char *ip_hexa = sqlite3_column_text(stmt, 2);
+    while (sqlite3_step(instruction) == SQLITE_ROW) {
+        const unsigned char *ip = sqlite3_column_text(instruction, 0);
+        const unsigned char *ip_binaire = sqlite3_column_text(instruction, 1);
+        const unsigned char *ip_hexa = sqlite3_column_text(instruction, 2);
 
         if(graphique == false){
             printf("Adresses IP avec le masque %s :\n", masque_recherche);
@@ -397,11 +394,10 @@ char * recherche_par_masque(const char *masque_recherche, bool graphique) {
             resultats = g_strconcat(resultats,"Liste des adresses IP :\n","------------------------------------------------\n",
                 "IP: ", ip,"| Masque Binaire:",ip_binaire,"| IP Hexa:",ip_hexa,"\n", NULL);
         }
-        
         adresse_trouvee = 1;
     }
-    sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    sqlite3_finalize(instruction);
+    sqlite3_close(base_sql);
     if (!adresse_trouvee) {
         printf("Aucune adresse IP associée à ce masque de sous-réseau.\n");
          return g_strdup("Aucune adresse IP associée à ce masque de sous-réseau.\n");
@@ -419,7 +415,8 @@ char * recherche_par_masque(const char *masque_recherche, bool graphique) {
  *         La mémoire allouée est libérée après utilisation.
  */
 char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
-
+    sqlite3 *base_sql;
+    int rc;
     char *resultats = g_strdup("");
 
     if(graphique == false){
@@ -443,12 +440,10 @@ char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
         return resultats;
     }
 
-    sqlite3 *db;
-    int rc;
-    rc = sqlite3_open(DB_PATH, &db);
+    rc = sqlite3_open(DB_PATH, &base_sql);
     if (rc) {
-        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         exit(1);
         resultats = g_strdup("Impossible d'ouvrir la base de données : %s\n");
     }
@@ -456,10 +451,10 @@ char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
     const char *sql = "DELETE FROM ip_masque WHERE ip = ? AND masque = ?";
     sqlite3_stmt *stmt;
 
-    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    rc = sqlite3_prepare_v2(base_sql, sql, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(base_sql));
+        sqlite3_close(base_sql);
         exit(1);
         resultats = g_strdup("Erreur lors de la préparation de la requête.\n");
     }
@@ -469,7 +464,7 @@ char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
+        fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(base_sql));
         resultats = g_strdup("Erreur lors de l'exécution de la requête.\n");
     } else {
         printf("L'adresse IP et le masque ont été supprimés de la base de données.\n");
@@ -477,7 +472,7 @@ char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
     }
 
     sqlite3_finalize(stmt);
-    sqlite3_close(db);
+    sqlite3_close(base_sql);
     return resultats;
 }
 
@@ -524,7 +519,7 @@ void menu(int argc, char *argv[]){
                     int b_interface  = menu_interface(argc, argv);
                      if (b_interface == 0) {
                         printf("Au revoir !\n");
-                        return; 
+                        return;
                     }
                     printf("%d", b_interface);
                     break;
