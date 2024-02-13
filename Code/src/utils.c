@@ -261,3 +261,49 @@ bool validData_i(char *ip, char *mask) {
             return false;
     }
 }
+
+/**
+ * Liste les adresses IP et leurs informations depuis la base de données.
+ * @param graphique Indique si l'affichage est destiné à une interface graphique.
+ * @return Une chaîne de caractères contenant la liste des adresses IP et leurs informations.
+ *         En cas d'erreur, renvoie une chaîne vide ou un message d'erreur.
+ *         La mémoire allouée doit être libérée après utilisation.
+ */
+char *lister_ip(bool graphique) {
+    sqlite3 *db;
+    sqlite3_stmt *stmt;
+    int rc;
+    char *resultats = g_strdup("");
+
+    rc = sqlite3_open(DB_PATH, &db);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        resultats = g_strdup("Impossible d'ouvrir la base de données");
+        return resultats;
+    }
+
+    const char *sql = "SELECT * FROM ip_masque";
+    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        fprintf(stderr, "Erreur lors de la préparation de la requête : %s\n", sqlite3_errmsg(db));
+        sqlite3_close(db);
+        resultats = g_strdup("Erreur lors de la préparation de la requête");
+        return resultats;
+    }
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        const unsigned char *ip = sqlite3_column_text(stmt, 1);
+        const unsigned char *masque = sqlite3_column_text(stmt, 2);
+        const unsigned char *ip_binaire = sqlite3_column_text(stmt, 3);
+        const unsigned char *ip_hex = sqlite3_column_text(stmt, 4);
+        if(graphique) {
+            resultats = g_strconcat(resultats, "Liste des adresses IP :\n", "------------------------------------------------\n",
+            "IP: ", ip, " | Masque: ", masque, "| Binaire:", ip_binaire, "| Hexa:", ip_hex, "\n", NULL);
+        }
+    }
+    sqlite3_finalize(stmt);
+    sqlite3_close(db);
+    
+    return resultats;
+}

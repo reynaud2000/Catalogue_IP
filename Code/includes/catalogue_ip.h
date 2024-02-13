@@ -16,12 +16,12 @@
 #include <pango/pangocairo.h>
 #define DB_PATH "catalogue_ip.db"
 
-extern GtkWidget *window;
-extern GtkWidget *fixed;
+extern GtkWidget *fenetre;
+extern GtkWidget *fixe;
 extern GtkWidget *label;
-extern GtkWidget *dialog;
-extern GtkWidget *content_area;
-extern GtkWidget *entry;
+extern GtkWidget *dialogue;
+extern GtkWidget *contenu;
+extern GtkWidget *entrer;
 typedef struct element
 {
     char *Ip;
@@ -60,10 +60,19 @@ void filterLst(listAdr myLst, char *Ip, char *Mask);
 int number(char const *str);
 bool AlreadyExistLst(listAdr myLst, char *Ip, char *Mask);
 bool validData_ncurses(char *ip, char *mask, char *line, WINDOW *win);
-int menu_interface();
 bool verifyNumberMask(int number);
 bool verifyNumberIP(int number);
 bool validData_i(char *ip, char *mask);
 char *filtered_mask(bool graphique, const char *ip_add, const char *mask);
+char *lister_ip(bool graphique);
+const char *fenetre_adresse_ip(GtkWidget *widget, const char *data);
+const char *fenetre_masque(GtkWidget *widget, const char *data);
+void affiche_popup(char *resultats);
+void ajout_ip(GtkWidget *widget);
+void filtrer_par_mask(GtkWidget *widget);
+void sup_ip(GtkWidget *widget);
+void clique(GtkWidget *widget, GdkEventButton *event, gpointer data);
+void creation_rectangle(GtkWidget *fixe, int x, int y, int l, int h, const gchar *text);
+int menu_interface();
 
 #endif 

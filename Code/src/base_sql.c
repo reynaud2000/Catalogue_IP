@@ -91,6 +91,7 @@ char *ajouter_ip(const char *ip, const char *masque, bool graphique) {
     sqlite3 *base_sql;
     int resultat;
     const char *requete_sql;
+    resultat = sqlite3_open(DB_PATH, &base_sql);
 
 
     if (validData_i((char *) ip, (char *) masque) == false) {
@@ -102,7 +103,6 @@ char *ajouter_ip(const char *ip, const char *masque, bool graphique) {
             printf("Merci de rentrer un masque ou une ip valide en X.X.X.X\n");
         }
     
-    resultat = sqlite3_open(DB_PATH, &base_sql);
     if (resultat) {
         fprintf(stderr, "Impossible d'ouvrir la base de données : %s\n", sqlite3_errmsg(base_sql));
         sqlite3_close(base_sql);
