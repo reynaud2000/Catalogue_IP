@@ -1,5 +1,15 @@
+
+/**
+ * @file
+ * @brief Ce fichier contient les fonctions utils qui aide aux autres fonctions.
+ */
 #include "../includes/catalogue_ip.h"
 
+/**
+ * Cette fonction lit une ligne depuis l'entrée standard (stdin) et la stocke dans un tampon de caractères.
+ *
+ * @return La ligne lue depuis stdin (sans le caractère de saut de ligne à la fin), ou NULL en cas d'erreur.
+ */
 char *get(void)
 {
     char *tab = NULL;
@@ -11,7 +21,14 @@ char *get(void)
     tab[n - 1] = '\0';
     return (tab);
 }
-
+/**
+ * Cette fonction prend une adresse IP et un masque sous-réseau au format décimal
+ * et retourne l'adresse réseau correspondante.
+ *
+ * @param ip   L'adresse IP au format décimal pointé.
+ * @param mask Le masque de sous-réseau au format décimal pointé.
+ * @return     L'adresse réseau résultante au format décimal pointé.
+ */
 char *getIpNetwork(char *ip, char *mask) {
     int Ip1, Ip2, Ip3, Ip4;
     int mask1, mask2, mask3, mask4;
@@ -22,7 +39,12 @@ char *getIpNetwork(char *ip, char *mask) {
     sprintf (IpNetwork, "%d.%d.%d.%d", Ip1 & mask1, Ip2 & mask2, Ip3 & mask3, Ip4 & mask4);
     return (strdup(IpNetwork));
 }
-
+/**
+ * Cette fonction calcule la longueur d'une chaîne de caractères.
+ *
+ * @param str La chaîne de caractères dont on veut calculer la longueur.
+ * @return    La longueur de la chaîne de caractères.
+ */
 int my_strlen(char const *str)
 {
     int p;
@@ -36,6 +58,12 @@ void free_2d_array(char **tab)
         free(tab[i]);
 }
 
+/**
+ * Compte le nombre de mots dans une chaîne de caractères.
+ *
+ * @param str La chaîne de caractères à analyser.
+ * @return Le nombre de mots dans la chaîne.
+ */
 int number(char const *str)
 {
     int a = 0;
@@ -46,6 +74,12 @@ int number(char const *str)
     return (a + 1);
 }
 
+/**
+ * Convertit une chaîne de caractères en tableau de mots.
+ *
+ * @param str La chaîne de caractères à convertir.
+ * @return Un tableau de mots.
+ */
 char **my_str_to_word_array(char const *str)
 {
     int comp = 0, p = 0;
@@ -67,17 +101,35 @@ char **my_str_to_word_array(char const *str)
     return (buffer);
 }
 
+/**
+ * Vérifie si un nombre donné est une valeur valide pour une adresse IP.
+ *
+ * @param number Le nombre à vérifier.
+ * @return true si le nombre est valide pour une adresse IP, sinon false.
+ */
 bool verifyNumberIP(int number) {
     return true ? number >= 0 && number <= 255 : false;
 }
-
+/**
+ * Vérifie si un nombre donné est une valeur valide pour un masque de sous-réseau.
+ *
+ * @param number Le nombre à vérifier.
+ * @return true si le nombre est valide pour un masque de sous-réseau, sinon false.
+ */
 bool verifyNumberMask(int number) {
     if (number == 0 || number == 128 || number == 192 || number == 224 || number == 240 || number == 248 || number == 252 || number == 254 || number == 255)
         return true;
     else
         return false;
 }
-
+/**
+ * Vérifie si les données IP et masque fournies sont valides.
+ *
+ * @param ip L'adresse IP à vérifier.
+ * @param mask Le masque de sous-réseau à vérifier.
+ * @param line La ligne saisie par l'utilisateur.
+ * @return true si les données IP et masque sont valides, sinon false.
+ */
 bool validData(char *ip, char *mask, char *line) {
     if (ip == NULL || number(line) != 3) {
         printf("\033[1;31mVous devez entrer une IP et un MASQUE.\033[0m\n");
@@ -97,7 +149,15 @@ bool validData(char *ip, char *mask, char *line) {
             return false;
     }
 }
-
+/**
+ * Vérifie si les données IP et masque fournies sont valides dans l'interface ncurses.
+ *
+ * @param ip L'adresse IP à vérifier.
+ * @param mask Le masque de sous-réseau à vérifier.
+ * @param line La ligne saisie par l'utilisateur.
+ * @param win La fenêtre ncurses où afficher les messages d'erreur.
+ * @return true si les données IP et masque sont valides, sinon false.
+ */
 bool validData_ncurses(char *ip, char *mask, char *line, WINDOW *win) {
     if (ip == NULL || number(line) != 3) {
         TextColored(win, 5, 48, "Vous devez entrer une IP et un MASQUE.", 1);
@@ -117,7 +177,16 @@ bool validData_ncurses(char *ip, char *mask, char *line, WINDOW *win) {
             return false;
     }
 }
-
+/**
+ * Filtre les adresses IP dans la base de données en fonction de l'adresse IP et du masque spécifiés.
+ *
+ * @param graphique Indique si l'interface graphique est utilisée.
+ * @param ip_add L'adresse IP à utiliser pour le filtrage.
+ * @param mask Le masque de sous-réseau à utiliser pour le filtrage.
+ * @return Une chaîne de caractères contenant les résultats du filtrage.
+ *         Si aucune adresse IP n'est trouvée, une chaîne vide est retournée.
+ *         En cas d'erreur, un message d'erreur approprié est retourné.
+ */
 char *filtered_mask(bool graphique, const char *ip_add, const char *mask) {
     sqlite3 *db;
     sqlite3_stmt *stmt;
@@ -169,7 +238,14 @@ char *filtered_mask(bool graphique, const char *ip_add, const char *mask) {
     sqlite3_close(db);
     return resultats;
 }
-
+/**
+ * Vérifie si l'adresse IP et le masque spécifiés sont valides.
+ *
+ * @param ip L'adresse IP à vérifier.
+ * @param mask Le masque de sous-réseau à vérifier.
+ * @return true si l'adresse IP et le masque sont valides, sinon false.
+ *         Affiche un message d'erreur approprié s'ils ne sont pas valides.
+ */
 bool validData_i(char *ip, char *mask) {
     if (ip == NULL) {
         printf("\033[1;31mVous devez entrer une IP et un MASQUE.\033[0m\n");

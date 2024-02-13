@@ -1,11 +1,29 @@
+/**
+ * @file
+ * @brief Ce fichier contient les fonctions pour gérer l'interface terminal.
+ */
 #include "../includes/catalogue_ip.h"
 
+/**
+ * Cette fonction affiche du texte coloré dans une fenêtre spécifiée de l'interface NCurses.
+ *
+ * @param win La fenêtre dans laquelle le texte coloré sera affiché.
+ * @param x La position verticale (ligne) du texte dans la fenêtre.
+ * @param y La position horizontale (colonne) du texte dans la fenêtre.
+ * @param text Le texte à afficher dans la fenêtre.
+ * @param color La paire de couleurs à appliquer au texte (définie par des paires de couleurs attribuées via init_pair()).
+ */
 void TextColored(WINDOW *win, int x, int y, char *text, int color) {
     wattron(win, COLOR_PAIR(color));
     mvwprintw(win, x, y, "%s", text);
     wattroff(win, COLOR_PAIR(color));
 }
 
+/**
+ * Cette fonction affiche un message de bienvenue personnalisé dans le mode ncurses.
+ *
+ * @param name Le nom de l'utilisateur à inclure dans le message de bienvenue.
+ */
 void Welcome(char *name) {
     int height, width;
     getmaxyx(stdscr, height, width);
@@ -13,10 +31,22 @@ void Welcome(char *name) {
     getch();
 }
 
+/**
+ * Cette fonction affiche un message d'erreur indiquant une commande invalide dans une fenêtre spécifiée de l'interface NCurses.
+ *
+ * @param win La fenêtre dans laquelle le message d'erreur sera affiché.
+ */
 void bad_command_ncurses(WINDOW *win) {
     TextColored(win, 6, 40, "Commande invalide. Essaye la commande \" help \".\n", 1);
 }
 
+/**
+ * Cette fonction ajoute une adresse IP avec son masque correspondant à la base de données SQLite
+ *
+ * @param ip L'adresse IP à ajouter à la base de données.
+ * @param masque Le masque de sous-réseau correspondant à l'adresse IP.
+ * @param win La fenêtre dans laquelle afficher les résultats de l'opération.
+ */
 void ajouter_ip_ncurses(const char *ip, const char *masque, WINDOW *win) {
     char *ip_binaire, *ip_hexa;
     sqlite3 *db;
@@ -38,8 +68,8 @@ void ajouter_ip_ncurses(const char *ip, const char *masque, WINDOW *win) {
     }
     sqlite3_bind_text(stmt, 1, ip, -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, masque, -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, ip_to_binary((char *)ip), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, ip_to_hex((char *)ip), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, ip_en_binaire((char *)ip), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, ip_en_hexa((char *)ip), -1, SQLITE_STATIC);
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE)
         TextColored(win, 4, 40, "Erreur lors de l'exécution de la requête", 2);
@@ -50,6 +80,13 @@ void ajouter_ip_ncurses(const char *ip, const char *masque, WINDOW *win) {
     sqlite3_close(db);
 }
 
+/**
+ * Cette fonction supprime une adresse IP avec son masque correspondant de la base de données SQLite
+ *
+ * @param ip L'adresse IP à supprimer de la base de données.
+ * @param masque Le masque de sous-réseau correspondant à l'adresse IP à supprimer.
+ * @param win La fenêtre dans laquelle afficher les résultats de l'opération.
+ */
 void supprimer_ip_ncurses(const char *ip, const char *masque, WINDOW *win) {
     sqlite3 *db;
     int rc;
@@ -79,18 +116,28 @@ void supprimer_ip_ncurses(const char *ip, const char *masque, WINDOW *win) {
     sqlite3_close(db);
 }
 
+/**
+ * Cette fonction affiche un guide d'utilisation des commandes pour le programme dans une fenêtre spécifiée de l'interface NCurses.
+ *
+ * @param win La fenêtre dans laquelle afficher le guide d'utilisation des commandes.
+ */
 void help_ncurses(WINDOW *win) { 
     mvwprintw (win, 5, 20, "Voici les commandes pour utiliser ce programme :\n");
-    mvwprintw (win, 6, 20, "add <IP> <MASK> : Ajouter une adresse IP et son MASK\n");
+    mvwprintw (win, 6, 20, "add <IP> <MASK> : Ajouter une adresse IP et son MASQUE\n");
     mvwprintw (win, 7, 20, "search <IP> <MASK> : Filtrer les adresses IP qui appartiennent au même sous-réseau\n");
     mvwprintw (win, 8, 20, "search_net <IP> <MASK> : Filtrer les adresses IP étant dans le même réseau\n");
     mvwprintw (win, 9, 20, "list : Afficher les adresses IP ainsi que leurs formes binaires, hexadécimales et décimales\n");
     mvwprintw (win, 10, 20, "delete <IP> <MASK> : Supprimer une adresse IP\n");
-    mvwprintw (win, 11, 20, "gtk : Lancer l'interface graphique SDL\n");
-    mvwprintw (win, 12, 20, "help : Display help\n");
+    mvwprintw (win, 11, 20, "gtk : Lancer l'interface graphique\n");
+    mvwprintw (win, 12, 20, "help : L'aide\n");
     mvwprintw (win, 13, 20, "quit : Quitter le programme\n");
 }
-
+/**
+ * Cette fonction affiche la liste des adresses IP avec leurs détails (masque, IP binaire, IP hexadécimale)
+ *
+ * @param myLst La liste des adresses IP à afficher.
+ * @param win La fenêtre dans laquelle afficher la liste des adresses IP.
+ */
 void displaylist_ncurses(listAdr myLst, WINDOW *win) {
     element *tmp = myLst;
     int i = 0;
@@ -98,26 +145,42 @@ void displaylist_ncurses(listAdr myLst, WINDOW *win) {
     while (tmp != NULL) {
         i++;
         mvwprintw(win, x, 5, "%d- Ip: %s\tMask: %s\tBinary: %s\tHexa: %s\n", i, tmp->Ip, tmp->Mask, tmp->binary_Ip, tmp->Hex_Ip);
-        // printf ("Network: %s\n", tmp->IpNetwork);
         tmp = tmp->nxt;
         x++;
     }
     if (i == 0)
         TextColored(win, 5, 48, "La base de donnée est vide.", 1);
 }
-
+/**
+ * Cette fonction ajoute une nouvelle adresse IP avec ses détails (masque, IP binaire, IP hexadécimale).
+ *
+ * @param myLst La liste des adresses IP à laquelle ajouter la nouvelle adresse IP.
+ * @param Ip L'adresse IP à ajouter.
+ * @param Mask Le masque de sous-réseau correspondant à l'adresse IP.
+ * @param Ipbin L'adresse IP binaire.
+ * @param Iphex L'adresse IP hexadécimale.
+ * @param win La fenêtre dans laquelle afficher le message de succès.
+ * @return La liste mise à jour avec la nouvelle adresse IP ajoutée en tête.
+ */
 listAdr addDataLst_ncurses(listAdr myLst, char *Ip, char *Mask, char * Ipbin, char *Iphex, WINDOW *win) {
     element *new_lst = malloc(sizeof(element));
     new_lst->Ip = strdup(Ip);
     new_lst->Mask = strdup(Mask);
     new_lst->binary_Ip = strdup(Ipbin);
     new_lst->Hex_Ip = strdup(Iphex);
-    // new_lst->IpNetwork = getIpNetwork(Ip, Mask);
     new_lst->nxt = myLst;
     TextColored(win, 6, 40, "L'adresse IP a ete ajoutee avec succes", 1);
     return new_lst;
 }
-
+/**
+ * Cette fonction supprime une adresse IP avec son masque correspondant de la liste des adresses IP
+ *
+ * @param myLst La liste des adresses IP à partir de laquelle supprimer l'adresse IP.
+ * @param Ip L'adresse IP à supprimer.
+ * @param Mask Le masque de sous-réseau correspondant à l'adresse IP à supprimer.
+ * @param win La fenêtre dans laquelle afficher le message d'erreur si l'adresse IP n'est pas trouvée.
+ * @return La liste mise à jour après la suppression ou sans modification si l'adresse IP n'est pas trouvée.
+ */
 listAdr deleteIP_ncurses(listAdr myLst, char *Ip, char *Mask, WINDOW *win) {
     element *tmp = myLst;
     element *prev = NULL;
@@ -140,6 +203,14 @@ listAdr deleteIP_ncurses(listAdr myLst, char *Ip, char *Mask, WINDOW *win) {
     return myLst;
 }
 
+/**
+ * Cette fonction filtre les adresses IP dans la liste 'myLst' qui appartiennent au même réseau que l'adresse IP 'Ip'
+ *
+ * @param myLst La liste des adresses IP à filtrer.
+ * @param Ip L'adresse IP à utiliser comme référence pour le filtre.
+ * @param Mask Le masque de sous-réseau à utiliser pour le filtrage.
+ * @param win La fenêtre dans laquelle afficher les adresses IP filtrées ou le message d'erreur.
+ */
 void filterLst_ncurses(listAdr myLst, char *Ip, char *Mask, WINDOW *win) {
     element *tmp = myLst;
     int i = 0;
@@ -155,7 +226,15 @@ void filterLst_ncurses(listAdr myLst, char *Ip, char *Mask, WINDOW *win) {
     if (i == 0)
         TextColored(win, 4, 40, "Aucune adresse IP n'a été trouvé.", 1);
 }
-
+/**
+ * Cette fonction vérifie si une adresse IP avec le même masque existe déjà dans la liste 'myLst'.
+ *
+ * @param myLst La liste des adresses IP à vérifier.
+ * @param Ip L'adresse IP à comparer.
+ * @param Mask Le masque de sous-réseau à comparer.
+ * @param win La fenêtre dans laquelle afficher le message d'erreur ou le message de confirmation.
+ * @return true si l'adresse IP existe déjà dans la liste, false sinon.
+ */
 bool AlreadyExistLst_ncurses(listAdr myLst, char *Ip, char *Mask, WINDOW *win) {
     element *tmp = myLst;
     int find = 0;
@@ -173,7 +252,13 @@ bool AlreadyExistLst_ncurses(listAdr myLst, char *Ip, char *Mask, WINDOW *win) {
         return true;
     }
 }
-
+/**
+ * Cette fonction lance l'interface utilisateur en mode ncurses pour interagir avec les données des adresses IP.
+ *
+ * @param name Le nom de l'utilisateur à afficher dans le message de bienvenue.
+ * @param myLst La liste des adresses IP à manipuler.
+ * @return La liste des adresses IP après les modifications éventuelles.
+ */
 listAdr launchNurcuses(char *name, listAdr myLst) {
     initscr();
     start_color();
@@ -210,7 +295,7 @@ listAdr launchNurcuses(char *name, listAdr myLst) {
             if (validData_ncurses(words[1], words[2], input, win) == true
             && AlreadyExistLst_ncurses(myLst, words[1], words[2], win) == false) {
                 ajouter_ip_ncurses(words[1], words[2], win);
-                myLst = addDataLst_ncurses(myLst, words[1], words[2], ip_to_binary(words[1]), ip_to_hex(words[1]), win);
+                myLst = addDataLst_ncurses(myLst, words[1], words[2], ip_en_binaire(words[1]), ip_en_hexa(words[1]), win);
             }
             wrefresh(win);
             refresh();
@@ -245,8 +330,6 @@ listAdr launchNurcuses(char *name, listAdr myLst) {
         else if (strcmp(words[0], "gtk") == 0) {
             werase(win);
             box(win, 0, 0);
-            // Ajoute la fonction ici
-
             wrefresh(win);
             refresh();
         }
@@ -257,7 +340,6 @@ listAdr launchNurcuses(char *name, listAdr myLst) {
             wrefresh(win);
             refresh();
         }
-
     }
     wrefresh(win);
     werase(win);

@@ -1,9 +1,14 @@
+/**
+ * @file
+ * @brief Ce fichier contient les fonctions pour gérer l'interface graphique.
+ */
+
 #include "../includes/catalogue_ip.h"
 
 GtkWidget *window = NULL;
 GtkWidget *fixed = NULL;
 GtkWidget *label = NULL;
-GtkWidget *dialog = NULL;
+GtkWidget *dialogue = NULL;
 GtkWidget *content_area = NULL;
 GtkWidget *entry = NULL;
 
@@ -24,26 +29,26 @@ const char *fenetre_input_adresse_ip(GtkWidget *widget, const char *data) {
     const gchar *bouton_ecrire_texte = (const gchar *)data;
     bouton_ecrire_texte = "Ajouter une adresse IP";
     if (strcmp(bouton_ecrire_texte, "Ajouter une adresse IP") == 0) {
-        dialog = gtk_dialog_new_with_buttons("Ajouter une adresse IP",
+        dialogue = gtk_dialog_new_with_buttons("Ajouter une adresse IP",
         GTK_WINDOW(window), GTK_DIALOG_MODAL, "Valider", GTK_RESPONSE_ACCEPT, "Annuler", GTK_RESPONSE_CANCEL, NULL);
-        content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+        content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialogue));
         entry = gtk_entry_new();
         gtk_container_add(GTK_CONTAINER(content_area), entry);
-        gtk_widget_show_all(dialog);
-        gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_show_all(dialogue);
+        gint response = gtk_dialog_run(GTK_DIALOG(dialogue));
         if (response == GTK_RESPONSE_ACCEPT) {
 
             const char *ip_address = strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
             
             g_print("Adresse IP saisie : %s\n", ip_address);
-            gtk_widget_destroy(dialog);
+            gtk_widget_destroy(dialogue);
             return ip_address;
         }
         else if (response == GTK_RESPONSE_CANCEL) {
-            gtk_widget_destroy(dialog);
+            gtk_widget_destroy(dialogue);
             return NULL;
         }
-        gtk_widget_destroy(dialog);
+        gtk_widget_destroy(dialogue);
         
     }
     return NULL; 
@@ -59,26 +64,26 @@ const char *fenetre_input_masque(GtkWidget *widget, const char *data) {
     const gchar *bouton_ecrire_texte = (const gchar *)data;
     bouton_ecrire_texte = "Ajouter un masque";
     if (strcmp(bouton_ecrire_texte, "Ajouter un masque") == 0) {
-        dialog = gtk_dialog_new_with_buttons("Ajouter un masque",
+        dialogue = gtk_dialog_new_with_buttons("Ajouter un masque",
             GTK_WINDOW(window), GTK_DIALOG_MODAL, "Valider", GTK_RESPONSE_ACCEPT, "Annuler", GTK_RESPONSE_CANCEL, NULL);
-        content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+        content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialogue));
         entry = gtk_entry_new();
         gtk_container_add(GTK_CONTAINER(content_area), entry);
-        gtk_widget_show_all(dialog);
-        gint response = gtk_dialog_run(GTK_DIALOG(dialog));
+        gtk_widget_show_all(dialogue);
+        gint response = gtk_dialog_run(GTK_DIALOG(dialogue));
         if (response == GTK_RESPONSE_ACCEPT) {
 
             const char *masque = strdup(gtk_entry_get_text(GTK_ENTRY(entry)));
             
             g_print("Masque saisie : %s\n", masque);
-            gtk_widget_destroy(dialog);
+            gtk_widget_destroy(dialogue);
             return masque;
         }
         else if (response == GTK_RESPONSE_CANCEL) {
-            gtk_widget_destroy(dialog);
+            gtk_widget_destroy(dialogue);
             return NULL;
         }
-        gtk_widget_destroy(dialog);
+        gtk_widget_destroy(dialogue);
     }
     return NULL; 
 }
@@ -149,7 +154,12 @@ void affiche_liste(char *resultats) {
         gtk_widget_destroy(window);
     }
 }
-
+/**
+ * Cette fonction est appelée lorsqu'un utilisateur souhaite ajouter une nouvelle adresse IP à la base de données.
+ * Elle récupère l'adresse IP et le masque de sous-réseau saisis par l'utilisateur à partir des fenêtres de saisie.
+ * 
+ * @param widget Le widget déclencheur de l'événement, le bouton dans l'interface graphique.
+ */
 void ajout_ip(GtkWidget *widget) {
     const char *ip_address = fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
     const char *masque = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
@@ -159,6 +169,12 @@ void ajout_ip(GtkWidget *widget) {
     free((void *)masque);
 }
 
+/**
+ * Cette fonction est appelée lorsque l'utilisateur souhaite filtrer les adresses IP de la liste selon un masque spécifié.
+ * Elle récupère l'adresse IP et le masque de sous-réseau saisis par l'utilisateur à partir des fenêtres de saisie.
+ *
+ * @param widget Le widget déclencheur de l'événement, le bouton dans l'interface graphique.
+ */
 void filtrer_par_mask(GtkWidget *widget) {
     const char *ip  = fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
     const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
@@ -167,6 +183,12 @@ void filtrer_par_mask(GtkWidget *widget) {
     free((void *)masque);
 }
 
+/**
+ * Cette fonction est appelée lorsque l'utilisateur souhaite supprimer une adresse IP de la base de données.
+ * Elle récupère l'adresse IP et le masque de sous-réseau saisis par l'utilisateur à partir des fenêtres de saisie.
+ *
+ * @param widget Le widget déclencheur de l'événement, le bouton dans l'interface graphique.
+ */
 void delete_ip(GtkWidget *widget) {
     const char *ip  = fenetre_input_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
     const char *masque  = fenetre_input_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
@@ -175,7 +197,13 @@ void delete_ip(GtkWidget *widget) {
     free((void *)masque);
 }
 
-
+/**
+ * Cette fonction est appelée lorsqu'un événement de clic de souris se produit sur le widget spécifié.
+ *
+ * @param widget Le widget sur lequel l'événement de clic de souris s'est produit.
+ * @param event L'événement de bouton de la souris associé.
+ * @param data Des données supplémentaires associées à l'événement, si nécessaire.
+ */
 void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     if (event->type == GDK_BUTTON_PRESS) {
         gint x, y;
@@ -195,13 +223,27 @@ void clique(GtkWidget *widget, GdkEventButton *event, gpointer data) {
     }
 }
 
+/**
+ * Cette fonction crée un bouton rectangulaire dans un conteneur fixe avec les spécifications fournies.
+ *
+ * @param fixed Le conteneur fixe (fixed) auquel le bouton rectangulaire sera attaché.
+ * @param x La position horizontale (abscisse) du coin supérieur gauche du bouton dans le conteneur fixe.
+ * @param y La position verticale (ordonnée) du coin supérieur gauche du bouton dans le conteneur fixe.
+ * @param l La largeur du bouton.
+ * @param h La hauteur du bouton.
+ * @param text Le texte à afficher sur le bouton.
+ */
 void creation_rectangle(GtkWidget *fixed, int x, int y, int l, int h, const gchar *text) {
     GtkWidget *button = gtk_button_new_with_label(text);
     gtk_fixed_put(GTK_FIXED(fixed), button, x, y);
     gtk_widget_set_size_request(button, l, h);
     g_signal_connect(button, "button-press-event", G_CALLBACK(clique), NULL);
 }
-
+/**
+ * Cette fonction initialise l'interface graphique pour afficher un menu principal.
+ *
+ * @return La fonction retourne 0 une fois que l'interface graphique a été créée et que la boucle est terminée.
+ */
 int menu_interface() {
 
     gtk_init(&global_argc, &global_argv);

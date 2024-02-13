@@ -1,3 +1,8 @@
+/**
+ * @file
+ * @brief Ce fichier contient tous les prototypes des fonctions.
+ */
+
 #ifndef CATALOGUE_IP
 #define CATALOGUE_IP
 
@@ -30,7 +35,7 @@ typedef struct element
 listAdr addDataLst(listAdr myLst, char *Ip, char *Mask, char * Ipbin, char *Iphex);
 void displaylist(listAdr myLst);
 void freeList(listAdr myLst);
-listAdr load_Sql_In_List(listAdr myLst);
+listAdr sql_en_liste(listAdr myLst);
 listAdr deleteDataLst(listAdr myLst, char *Ip, char *Mask);
 char *get(void);
 void help();
@@ -42,8 +47,8 @@ int my_strlen(char const *str);
 int number(char const *str);
 void free_2d_array(char **tab);
 char *getIpNetwork(char *ip, char *mask);
-char* ip_to_hex(char *ip);
-char* ip_to_binary(char *ip);
+char* ip_en_hexa(char *ip);
+char* ip_en_binaire(char *ip);
 char * ajouter_ip(const char *ip, const char *masque, bool graphique);
 char *supprimer_ip(const char *ip, const char *masque, bool graphique);
 listAdr launchNurcuses(char *name, listAdr myLst);
