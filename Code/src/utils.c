@@ -194,11 +194,6 @@ char *filtered_mask(bool graphique, const char *ip_add, const char *mask) {
     char *resultats = g_strdup("");
 
 
-    if (validData_i((char *) ip_add, (char *) mask) == 0) {
-        resultats = g_strdup("Vous devez entrer une IP et un MASQUE.");
-        return resultats;
-    }
-
     if (validData_i((char *) ip_add, (char *) mask) == false) {
         resultats = g_strdup("Merci de rentrer un masque ou une ip valide en X.X.X.X");
         return resultats;
@@ -247,10 +242,11 @@ char *filtered_mask(bool graphique, const char *ip_add, const char *mask) {
  *         Affiche un message d'erreur approprié s'ils ne sont pas valides.
  */
 bool validData_i(char *ip, char *mask) {
-    if (ip == NULL) {
+    if (ip == NULL || mask == NULL) {
         printf("\033[1;31mVous devez entrer une IP et un MASQUE.\033[0m\n");
         return false;
     }
+
     else {
         int Ip1, Ip2, Ip3, Ip4;
         int mask1, mask2, mask3, mask4;

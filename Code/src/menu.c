@@ -33,6 +33,7 @@ void Loop_Menu(listAdr myLst) {
             help();
         
         else if (strcmp(command_line[0], "add") == 0) {
+            
             if (validData(command_line[1], command_line[2], line) == true
             && AlreadyExistLst(myLst, command_line[1], command_line[2]) == false)
                 myLst = addIp(myLst, command_line[1], command_line[2]);

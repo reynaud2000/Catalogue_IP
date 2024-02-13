@@ -35,6 +35,7 @@ void bad_command() {
  * @return La liste mise à jour des adresses IP.
  */
 listAdr addIp(listAdr myLst, char *ip, char *mask) {
+  
     ajouter_ip(ip, mask, false);
     myLst = addDataLst(myLst, ip, mask, ip_en_binaire(ip), ip_en_hexa(ip));
     return myLst;
