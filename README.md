@@ -1,6 +1,9 @@
 # Documentation du projet
 
-[Documentation](./Code/html/index.html)
+Ouvrir dans votre dossier ce fichier : ./Code/html/index.html
+
+[Page web de la documentation](./Code/html/index.html)
+
 
 # Prérequis pour le code 
  
