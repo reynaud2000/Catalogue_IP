@@ -1,6 +1,6 @@
 # Documentation du projet
 
-[Documentation](./html/index.html)
+[Documentation](./Code/html/index.html)
 
 # Prérequis pour le code 
  
