@@ -533,7 +533,7 @@ char *recherche_par_masque(bool graphique, const char *ip_a, const char *masque_
         if (strcmp(ip_masque_sous_reseau((char *)ip, (char *)masque), ip_masque_sous_reseau((char *)ip_a, (char *)masque_a)) == 0) {
             
             if(graphique){
-                resultats = g_strconcat(resultats,"IP: ", ip, " | Masque: ", masque, "| Binaire:", ip_binaire, "| Hexa:", ip_hex, "\n", NULL);
+                resultats = g_strconcat(resultats,"IP: ", ip, "\n", NULL);
             }
             else{
                 printf("IP: %s\n", ip);
