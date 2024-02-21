@@ -114,12 +114,13 @@ void affiche_popup(char *resultats) {
  * Elle récupère l'adresse IP et le masque de sous-réseau saisis par l'utilisateur à partir des fenêtres de saisie.
  * 
  * @param widget Le widget déclencheur de l'événement, le bouton dans l'interface graphique.
+ * @param fenetre La variable responsable de la fenêtre avec ncurses.
  */
-void ajout_ip(GtkWidget *widget) {
+void ajout_ip(GtkWidget *widget, WINDOW *fenetre) {
     const char *adresse_ip = fenetre_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
     const char *masque = fenetre_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
     g_print("ip: %s, mask: %s\n", adresse_ip, masque);
-    affiche_popup(ajouter_ip(adresse_ip, masque, true));
+    affiche_popup(ajouter_ip(adresse_ip, masque, true, false, fenetre));
     free((void *)adresse_ip);
     free((void *)masque);
 }
@@ -129,11 +130,12 @@ void ajout_ip(GtkWidget *widget) {
  * Elle récupère l'adresse IP et le masque de sous-réseau saisis par l'utilisateur à partir des fenêtres de saisie.
  *
  * @param widget Le widget déclencheur de l'événement, le bouton dans l'interface graphique.
+ * @param fenetre La variable responsable de la fenêtre avec ncurses.
  */
-void filtrer_par_masque(GtkWidget *widget) {
+void filtrer_par_masque(GtkWidget *widget, WINDOW *fenetre) {
     const char *ip  = fenetre_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
     const char *masque  = fenetre_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
-    affiche_popup(recherche_par_masque(true, ip, masque));
+    affiche_popup(recherche_par_masque(true, false, fenetre, ip, masque));
     free((void *)ip);
     free((void *)masque);
 }
@@ -143,11 +145,12 @@ void filtrer_par_masque(GtkWidget *widget) {
  * Elle récupère l'adresse IP et le masque de sous-réseau saisis par l'utilisateur à partir des fenêtres de saisie.
  *
  * @param widget Le widget déclencheur de l'événement, le bouton dans l'interface graphique.
+ * @param fenetre La variable responsable de la fenêtre avec ncurses.
  */
-void sup_ip(GtkWidget *widget) {
+void sup_ip(GtkWidget *widget, WINDOW *fenetre) {
     const char *ip  = fenetre_adresse_ip(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
     const char *masque  = fenetre_masque(widget, (gpointer)gtk_button_get_label(GTK_BUTTON(widget)));
-    affiche_popup(supprimer_ip(ip, masque, true));
+    affiche_popup(supprimer_ip(ip, masque, true, false, fenetre));
     free((void *)ip);
     free((void *)masque);
 }
@@ -158,22 +161,23 @@ void sup_ip(GtkWidget *widget) {
  * @param widget Le widget sur lequel l'événement de clic de souris s'est produit.
  * @param evenement L'événement de bouton de la souris associé.
  * @param donnee Des données supplémentaires associées à l'événement, si nécessaire.
+ * @param fenetre La variable responsable de la fenêtre avec ncurses.
  */
-void clique(GtkWidget *widget, GdkEventButton *evenement, gpointer donnee) {
+void clique(GtkWidget *widget, GdkEventButton *evenement, gpointer donnee, WINDOW *fenetre) {
     if (evenement->type == GDK_BUTTON_PRESS) {
         gint x, y;
         gtk_widget_translate_coordinates(widget, GTK_WIDGET(gtk_widget_get_toplevel(widget)), evenement->x, evenement->y, &x, &y);
         if ((x >= 187 && x <= 480) && (y >= 221 && y <= 314)) {
-            ajout_ip(widget);
+            ajout_ip(widget, fenetre);
         }     
         if ((x >= 537 && x <= 826) && (y >= 221 && y <= 314)) {
-            sup_ip(widget);
+            sup_ip(widget, fenetre);
         }
         if ((x >= 187 && x <= 480) && (y >= 410 && y <= 502)) {
-            affiche_popup(lister_ip(true));
+            affiche_popup(lister_ip(true, false, fenetre));
         }
         if ((x >= 537 && x <= 826) && (y >= 410 && y <= 502)) {
-            filtrer_par_masque(widget);
+            filtrer_par_masque(widget, fenetre);
         }
     }
 }

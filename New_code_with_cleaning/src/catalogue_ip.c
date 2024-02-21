@@ -168,14 +168,16 @@ void convertir_en_hexa(const char *adresse_ip, char *adresse_ip_hexa) {
  * @param ip L'adresse IP à ajouter.
  * @param masque Le masque à ajouter.
  * @param graphique Un booléen indiquant si l'ajout se fait en mode graphique.
+ * @param ncurses Un booléen indiquant si l'ajout se fait en mode ncurses.
+ * @param fenetre La variable responsable de la fenetre avec ncurses.
  * @return Un message indiquant le succès ou l'échec de l'ajout.
  */
-char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
+char* ajouter_ip(const char *ip, const char *masque, bool graphique, bool ncurses, WINDOW *fenetre) {
     char ip_saisie[16];
     char masque_saisie[16];
     char *resultats = g_strdup("");
 
-    if (graphique == false) {
+    if (graphique == false && ncurses == false) {
         printf("Entrez une adresse IP : ");
         scanf("%15s", ip_saisie);
         printf("Entrez un masque : ");
@@ -194,15 +196,27 @@ char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
     }
     
     if (!ip_valide(ip) || !masque_valide(masque)) {
-        printf("Adresse IP ou masque invalide.\n");
-        resultats = g_strdup("Adresse IP ou masque invalide.\n");
-        return resultats;
+        if (graphique) {
+            printf("Adresse IP ou masque invalide.\n");
+            resultats = g_strdup("Adresse IP ou masque invalide.\n");
+            return resultats;
+        }
+        else {
+            Couleur_Texte(fenetre, 4, 50, "Adresse IP ou masque invalide.\n", COLOR_RED);
+            return resultats;
+        }
     }
 
     if (existe_dans_base(ip, masque)) {
-        printf("L'adresse IP et le masque sont déjà présents dans la base.\n");
-        resultats = g_strdup("L'adresse IP et le masque sont déjà présents dans la base.\n");
-        return resultats;
+        if (graphique) {
+            printf("L'adresse IP et le masque sont déjà présents dans la base.\n");
+            resultats = g_strdup("L'adresse IP et le masque sont déjà présents dans la base.\n");
+            return resultats;
+        }
+        else {
+            Couleur_Texte(fenetre, 4, 50, "L'adresse IP et le masque sont déjà présents dans la base.\n", COLOR_RED);
+            return resultats;
+        }
     }
 
     char ip_hexa[16];
@@ -246,13 +260,33 @@ char* ajouter_ip(const char *ip, const char *masque, bool graphique) {
     
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
-        resultats = g_strdup("Erreur lors de l'exécution de la requête.\n");
-        return resultats;
+        if (graphique) {
+            fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
+            resultats = g_strdup("Erreur lors de l'exécution de la requête.\n");
+            return resultats;
+        }
+        else if (ncurses) {
+            Couleur_Texte(fenetre, 4, 50, "Erreur lors de l'exécution de la requête.\n", COLOR_RED);
+            return resultats;
+        }
+        else {
+            fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
+            return resultats;
+        }
     } else {
-        printf("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
-        resultats = g_strdup("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
-        return resultats;
+        if (graphique) {
+            printf("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
+            resultats = g_strdup("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
+            return resultats;
+        }
+        else if (ncurses) {
+            Couleur_Texte(fenetre, 4, 40, "L'adresse IP et le masque ont été ajoutés à la base de données.\n", COLOR_GREEN);
+            return resultats;
+        }
+        else {
+            printf("L'adresse IP et le masque ont été ajoutés à la base de données.\n");
+            return resultats;
+        }
     }
 
     sqlite3_finalize(stmt);
@@ -304,11 +338,13 @@ int existe_dans_base(const char *ip, const char *masque) {
 /**
  * Liste les adresses IP et leurs informations depuis la base de données.
  * @param graphique Indique si l'affichage est destiné à une interface graphique.
+ * @param ncurses Indique si l'affichage est destiné à une interface terminale.
+ * @param fenetre La variable responsable de la fenetre avec ncurses.
  * @return Une chaîne de caractères contenant la liste des adresses IP et leurs informations.
  *         En cas d'erreur, renvoie une chaîne vide ou un message d'erreur.
  *         La mémoire allouée doit être libérée après utilisation.
  */
-char *lister_ip(bool graphique) {
+char *lister_ip(bool graphique, bool ncurses, WINDOW *fenetre) {
 
     sqlite3 *db;
     sqlite3_stmt *stmt;
@@ -332,13 +368,13 @@ char *lister_ip(bool graphique) {
         return resultats;
     }
 
-    if (!graphique) {
+    if (!graphique && !ncurses) {
         printf("Liste des adresses IP :\n");
         printf("------------------------------------------------\n\n");
     } else {
         resultats = g_strconcat(resultats, "Liste des adresses IP :\n", "------------------------------------------------\n", NULL);
     }
-
+    int x = 4, i = 1;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
 
         const unsigned char *ip = sqlite3_column_text(stmt, 1);
@@ -350,7 +386,13 @@ char *lister_ip(bool graphique) {
 
         if (graphique) {
             resultats = g_strconcat(resultats, "IP: ", ip, " | Masque: ", masque, "| IP Binaire:", ip_binaire, "| IP Hexa:", ip_hexa, "\n", NULL);
-        } else {
+        }
+        else if (ncurses) {
+            mvwprintw(fenetre, x, 5, "%d- Ip: %s\tMask: %s\tBinary: %s\tHexa: %s\n", i, ip, masque, ip_binaire, ip_hexa);
+            x++;
+            i++;
+        }
+        else {
             printf("IP: %s | Masque: %s | IP Binaire: %s | IP Hexa: %s\n", ip, masque, ip_binaire, ip_hexa);
         } 
     }
@@ -364,16 +406,18 @@ char *lister_ip(bool graphique) {
  * @param ip L'adresse IP à supprimer.
  * @param masque Le masque à supprimer.
  * @param graphique Indique si l'affichage est destiné à une interface graphique.
+ * @param ncurses Un booléen indiquant si l'ajout se fait en mode ncurses.
+ * @param fenetre La variable responsable de la fenetre avec ncurses.
  * @return Un message indiquant le succès ou l'échec de la suppression.
  *         En cas d'erreur, renvoie un message explicatif.
  *         La mémoire allouée est libérée après utilisation.
  */
-char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
+char * supprimer_ip(const char *ip, const char *masque, bool graphique, bool ncurses, WINDOW *fenetre) {
     char ip_saisie[16];
     char masque_saisie[16];
     char *resultats = g_strdup("");
 
-    if (!graphique) {
+    if (!graphique && !ncurses) {
         printf("Entrez l'adresse IP à supprimer : ");
         scanf("%15s", ip_saisie);
         printf("Entrez le masque à supprimer : ");
@@ -394,15 +438,27 @@ char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
 
 
     if (!ip_valide(ip) || !masque_valide(masque)) {
-        printf("Adresse IP ou masque invalide.\n");
-        resultats = g_strdup("Adresse IP ou masque invalide.\n");
-        return resultats;
+        if (graphique) {
+            printf("Adresse IP ou masque invalide.\n");
+            resultats = g_strdup("Adresse IP ou masque invalide.\n");
+            return resultats;
+        }
+        else {
+            Couleur_Texte(fenetre, 4, 50, "Adresse IP ou masque invalide.\n", COLOR_RED);
+            return resultats;
+        }
     }
 
     if (!existe_dans_base(ip, masque)) {
-        printf("L'adresse IP et le masque spécifiés ne sont pas présents dans la base de données.\n");
-        resultats = g_strdup("L'adresse IP et le masque spécifiés ne sont pas présents dans la base de données.\n");
-        return resultats;
+        if (graphique) {
+            printf("L'adresse IP et le masque spécifiés ne sont pas présents dans la base de données.\n");
+            resultats = g_strdup("L'adresse IP et le masque spécifiés ne sont pas présents dans la base de données.\n");
+            return resultats;
+        }
+        else {
+            Couleur_Texte(fenetre, 4, 40, "L'adresse IP et le masque spécifiés ne sont pas présents dans la base de données.\n", COLOR_RED);
+            return resultats;
+        }
     }
 
     sqlite3 *db;
@@ -431,10 +487,16 @@ char * supprimer_ip(const char *ip, const char *masque, bool graphique) {
 
     rc = sqlite3_step(stmt);
     if (rc != SQLITE_DONE) {
-        fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
+        if (ncurses)
+            Couleur_Texte(fenetre, 4, 50, "Erreur lors de l'exécution de la requête.\n", COLOR_RED);
+        else
+            fprintf(stderr, "Erreur lors de l'exécution de la requête : %s\n", sqlite3_errmsg(db));
         resultats = g_strdup("Erreur lors de l'exécution de la requête.\n");
     } else {
-        printf("L'adresse IP et le masque ont été supprimés de la base de données.\n");
+        if (ncurses)
+            Couleur_Texte(fenetre, 4, 50, "L'adresse IP et le masque ont été supprimés de la base de données.\n", COLOR_GREEN);
+        else
+            printf("L'adresse IP et le masque ont été supprimés de la base de données.\n");
         resultats = g_strdup("L'adresse IP et le masque ont été supprimés de la base de données.\n");
     }
 
@@ -466,13 +528,15 @@ char *ip_masque_sous_reseau(char *ip, char *masque) {
  * Recherche les adresses IP dans la base de données en fonction de l'adresse IP et du masque spécifiés.
  *
  * @param graphique Indique si l'interface graphique est utilisée.
+ * @param ncurses Un booléen indiquant si l'interface ncurses est utilisée.
+ * @param fenetre La variable responsable de la fenêtre avec ncurses.
  * @param ip_add L'adresse IP à utiliser pour le filtrage.
  * @param mask Le masque de sous-réseau à utiliser pour le filtrage.
  * @return Une chaîne de caractères contenant les résultats du filtrage.
  *         Si aucune adresse IP n'est trouvée, une chaîne vide est retournée.
  *         En cas d'erreur, un message d'erreur approprié est retourné.
  */
-char *recherche_par_masque(bool graphique, const char *ip_a, const char *masque_a) {
+char *recherche_par_masque(bool graphique, bool ncurses, WINDOW *fenetre, const char *ip_a, const char *masque_a) {
     sqlite3 *db;
     sqlite3_stmt *stmt;
     int rc;
@@ -480,7 +544,7 @@ char *recherche_par_masque(bool graphique, const char *ip_a, const char *masque_
     char ip_saisie[16];
     char masque_saisie[16];
     
-    if(!graphique){   
+    if(!graphique && !ncurses) {   
         printf("Entrez une adresse IP : ");
         scanf("%15s", ip_saisie);
         printf("Entrez un masque : ");
@@ -495,9 +559,15 @@ char *recherche_par_masque(bool graphique, const char *ip_a, const char *masque_
         masque_a = masque_saisie;
     }
     if (!ip_valide(ip_a) || !masque_valide(masque_a)) {
-        printf("Adresse IP ou masque invalide.\n");
-        resultats = g_strdup("Adresse IP ou masque invalide.\n");
-        return resultats;
+        if (graphique) {
+            printf("Adresse IP ou masque invalide.\n");
+            resultats = g_strdup("Adresse IP ou masque invalide.\n");
+            return resultats;
+        }
+        else {
+            Couleur_Texte(fenetre, 4, 50, "Adresse IP ou masque invalide.\n", COLOR_RED);
+            return resultats;
+        }
     }
     
     rc = sqlite3_open(DB_PATH, &db);
@@ -517,13 +587,13 @@ char *recherche_par_masque(bool graphique, const char *ip_a, const char *masque_
         return resultats;
     }
     
-    if (!graphique) {
+    if (!graphique && !ncurses) {
         printf("\nListe des adresses IP dans le même sous réseau que %s | %s:\n", ip_saisie,masque_saisie);
         printf("------------------------------------------------\n\n");
     } else {
         resultats = g_strconcat(resultats, "Liste des adresses IP :\n", "------------------------------------------------\n", NULL);
     }
-
+    int x = 4, i = 1;
     while (sqlite3_step(stmt) == SQLITE_ROW) {
 
         const unsigned char *ip = sqlite3_column_text(stmt, 1);
@@ -534,6 +604,11 @@ char *recherche_par_masque(bool graphique, const char *ip_a, const char *masque_
             
             if(graphique){
                 resultats = g_strconcat(resultats,"IP: ", ip, "\n", NULL);
+            }
+            else if (ncurses) {
+                mvwprintw(fenetre, x, 50, "%d- Ip: %s\n", i, ip);
+                x++;
+                i++;
             }
             else{
                 printf("IP: %s\n", ip);

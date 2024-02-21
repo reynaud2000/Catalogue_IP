@@ -15,9 +15,9 @@
  * @param text Le texte à afficher dans la fenêtre.
  * @param color La paire de couleurs à appliquer au texte (définie par des paires de couleurs attribuées via init_pair()).
  */
-void TextColored(WINDOW *win, int x, int y, char *text, int color) {
+void Couleur_Texte(WINDOW *win, int x, int y, char *texte, int color) {
     wattron(win, COLOR_PAIR(color));
-    mvwprintw(win, x, y, "%s", text);
+    mvwprintw(win, x, y, "%s", texte);
     wattroff(win, COLOR_PAIR(color));
 }
 
@@ -112,6 +112,131 @@ void Aide() {
 }
 
 /**
+ * Cette fonction affiche un guide d'utilisation des commandes pour le programme dans une fenêtre spécifiée de l'interface NCurses.
+ *
+ * @param fenetre La fenêtre dans laquelle afficher le guide d'utilisation des commandes.
+ */
+void Aide_ncurses(WINDOW *fenetre) { 
+    mvwprintw (fenetre, 5, 20, "Voici les commandes pour utiliser ce programme :\n");
+    mvwprintw (fenetre, 6, 20, "ajouter <IP> <MASK> : Ajouter une adresse IP et son MASQUE\n");
+    mvwprintw (fenetre, 7, 20, "rechercher <IP> <MASK> : Filtrer les adresses IP qui appartiennent au même sous-réseau\n");
+    mvwprintw (fenetre, 8, 20, "lister : Afficher les adresses IP ainsi que leurs formes binaires, hexadécimales et décimales\n");
+    mvwprintw (fenetre, 9, 20, "supprimer <IP> <MASK> : Supprimer une adresse IP\n");
+    mvwprintw (fenetre, 10, 20, "aide : L'aide\n");
+    mvwprintw (fenetre, 11, 20, "quitter : Quitter le programme\n");
+}
+
+/**
+ * Cette fonction affiche un message d'erreur indiquant une commande invalide dans une fenêtre spécifiée de l'interface NCurses.
+ *
+ * @param fenêtre La fenêtre dans laquelle le message d'erreur sera affiché.
+ */
+void Mauvaise_commande_ncurses(WINDOW *fenetre) {
+    Couleur_Texte(fenetre, 4, 40, "Commande invalide. Essaye la commande \" help \".\n", 1);
+}
+
+/**
+ * Cette fonction affiche un message de bienvenue personnalisé dans le mode ncurses.
+ *
+ * @param nom Le nom de l'utilisateur à inclure dans le message de bienvenue.
+ */
+void Bienvenue_ncurses(char *nom) {
+    int hauteur, largeur;
+    getmaxyx(stdscr, hauteur, largeur);
+    mvprintw(hauteur/2, largeur/2 - strlen(nom) - 20, "Bienvenu dans le mode ncurses %s!!!", nom);
+    getch();
+}
+
+/**
+ * Cette fonction lance l'interface utilisateur en mode ncurses pour interagir avec les données des adresses IP.
+ *
+ * @param nom Le nom de l'utilisateur à afficher dans le message de bienvenue.
+ * @param myLst La liste des adresses IP à manipuler.
+ * @param fenetre La variable responsable de la fenêtre avec ncurses.
+ * @return La liste des adresses IP après les modifications éventuelles.
+ */
+void Lancer_Ncurses(char *nom, WINDOW *fenetre) {
+    initscr();
+    start_color();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
+    init_pair(2, COLOR_GREEN, COLOR_BLACK);
+    Bienvenue_ncurses(nom);
+    int i = 2;
+    char entrer[60];
+    int hauteur, largeur;
+    getmaxyx(stdscr, hauteur, largeur);
+    fenetre = newwin(20, 130, 8, 10);
+    box(fenetre, 0, 0);
+    refresh();  
+    wrefresh(fenetre);
+    while(1) {
+        mvwprintw(fenetre, i, (125 - 25) / 2, "Entrez votre commande : ");
+        mvwgetstr(fenetre, i + 1, (125 - 25) / 2, entrer);
+        char **mots = my_str_to_word_array(entrer);
+        if (strcmp(mots[0], "quitter") == 0) {
+            wrefresh(fenetre);
+            werase(fenetre);
+            break;
+        }
+        else if (strcmp(mots[0], "aide") == 0) {
+            werase(fenetre);
+            box(fenetre, 0, 0);
+            Aide_ncurses(fenetre);
+            wrefresh(fenetre);
+            refresh();
+        }
+        else if (strcmp(mots[0], "ajouter") == 0) {
+            werase(fenetre);
+            box(fenetre, 0, 0);
+            if (number(entrer) != 3)
+                Couleur_Texte(fenetre, 4, 45, "Vous devez entrer une ip et un masque.\n", COLOR_RED);
+            else
+                ajouter_ip(mots[1], mots[2], false, true, fenetre);
+            wrefresh(fenetre);
+            refresh();
+        }
+        else if (strcmp(mots[0], "rechercher") == 0) {
+            werase(fenetre);
+            box(fenetre, 0, 0);
+            if (number(entrer) != 3)
+                Couleur_Texte(fenetre, 4, 45, "Vous devez entrer une ip et un masque.\n", COLOR_RED);
+            else
+                recherche_par_masque(false, true, fenetre, mots[1], mots[2]);
+            wrefresh(fenetre);
+            refresh();
+        }
+        else if (strcmp(mots[0], "lister") == 0) {
+            werase(fenetre);
+            box(fenetre, 0, 0);
+            lister_ip(false, true, fenetre);
+            wrefresh(fenetre);
+            refresh();
+        }
+        else if (strcmp(mots[0], "supprimer") == 0) {
+            werase(fenetre);
+            if (number(entrer) != 3)
+                Couleur_Texte(fenetre, 4, 45, "Vous devez entrer une ip et un masque.\n", COLOR_RED);
+            else
+                supprimer_ip(mots[1], mots[2], false, true, fenetre);
+            wrefresh(fenetre);
+            refresh();
+        }
+        else {
+            werase(fenetre);
+            box(fenetre, 0, 0);
+            Mauvaise_commande_ncurses(fenetre);
+            wrefresh(fenetre);
+            refresh();
+        }
+    }
+    wrefresh(fenetre);
+    werase(fenetre);
+    delwin(fenetre);
+    endwin();
+}
+
+
+/**
  * Cette fonction crée une boucle interactive pour gérer les commandes de l'utilisateur.
  * 
  * @param myLst La liste chaînée contenant les adresses IP à gérer.
@@ -119,17 +244,17 @@ void Aide() {
 void menu_ncurses() {
     char *ip = NULL;
     char *masque = NULL;
-    creer_base_sql();
-    char *line = NULL, *name;
+    WINDOW *fenetre = newwin(20, 130, 8, 10);    creer_base_sql();
+    char *line = NULL, *nom;
     printf("Quel est votre pseudo d'informaticien?  ");
-    name = get();
-    printf("Bienvenue \033[0;34m%s\033[0m !!!!!\nConsultez les aides en lancant la commande \" aide \"\n", name);
+    nom = get();
+    printf("Bienvenue \033[0;34m%s\033[0m !!!!!\nConsultez les aides en lancant la commande \" aide \"\n", nom);
     while (1) {
-        printf("\033[0;34m%s\033[0m# ", name);
+        printf("\033[0;34m%s\033[0m# ", nom);
         line = get();
         char **command_line = my_str_to_word_array(line);
         if (strcmp(command_line[0], "q") == 0) {
-            printf("À la prochaine %s !!!!!\n", name);
+            printf("À la prochaine %s !!!!!\n", nom);
             free(line);
             break;
         }
@@ -137,24 +262,27 @@ void menu_ncurses() {
             Aide();
         }
         else if (strcmp(command_line[0], "a") == 0){
-            ajouter_ip(ip,masque,false);
+            ajouter_ip(ip,masque, false, false, fenetre);
         }
         else if (strcmp(command_line[0], "s") == 0){
-            supprimer_ip(ip,masque,false);
+            supprimer_ip(ip,masque,false, false, fenetre);
         }
         else if (strcmp(command_line[0], "l") == 0){
-            lister_ip(false);
+            lister_ip(false, false, fenetre);
         }
         else if (strcmp(command_line[0], "r") == 0){
-            recherche_par_masque(false,ip,masque);
+            recherche_par_masque(false, false, fenetre, ip, masque);
         }
         else if (strcmp(command_line[0], "gui") == 0) {
             menu_interface();
+        }
+        else if (strcmp(command_line[0], "ncurses") == 0) {
+            Lancer_Ncurses(nom, fenetre);
         }
         else
             printf("\033[1;31mCommande invalide. Essaye la commande \" aide \".\033[0m\n");
             free(line);
             free_2d_array(command_line);
     }
-    free(name);
+    free(nom);
 }
