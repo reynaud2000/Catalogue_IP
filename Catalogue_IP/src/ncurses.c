@@ -102,6 +102,10 @@ char **my_str_to_word_array(char const *str)
  */
 void Aide() {
     printf ("\t\tVoici les commandes pour utiliser ce programme :\n");
+    printf ("\t\t\033[0;32ma\033[0m : Ajouter une nouvelle adresse IP.\n");
+    printf ("\t\t\033[0;32ms\033[0m : Supprimer une adresse IP.\n");
+    printf ("\t\t\033[0;32ml\033[0m : Lister les adresses IP.\n");
+    printf ("\t\t\033[0;32mr\033[0m : Rechercher par masque de sous-réseau.\n");
     printf ("\t\t\033[0;32mgui\033[0m : Lancer l'interface graphique\n");
     printf ("\t\t\033[0;32mcli\033[0m : Lancer l'interface terminal\n");
     printf ("\t\t\033[0;32maide\033[0m : Aide\n");
@@ -257,6 +261,18 @@ void menu_ncurses() {
         }
         else if (strcmp(command_line[0], "aide") == 0){
             Aide();
+        }
+        else if (strcmp(command_line[0], "a") == 0){
+            ajouter_ip(ip,masque, false, false, fenetre);
+        }
+        else if (strcmp(command_line[0], "s") == 0){
+            supprimer_ip(ip,masque,false, false, fenetre);
+        }
+        else if (strcmp(command_line[0], "l") == 0){
+            lister_ip(false, false, fenetre);
+        }
+        else if (strcmp(command_line[0], "r") == 0){
+            recherche_par_masque(false, false, fenetre, ip, masque);
         }
         else if (strcmp(command_line[0], "gui") == 0) {
             menu_interface();
