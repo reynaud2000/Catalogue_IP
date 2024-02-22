@@ -1,0 +1,5 @@
+var searchData=
+[
+  ['sup_5fip_0',['sup_ip',['../includes_2catalogue__ip_8h.html#a77ee1839994dbc450bdd6f5da22706ca',1,'sup_ip(GtkWidget *widget, WINDOW *fenetre):&#160;interface.c'],['../src_2includes_2catalogue__ip_8h.html#a77ee1839994dbc450bdd6f5da22706ca',1,'sup_ip(GtkWidget *widget, WINDOW *fenetre):&#160;interface.c'],['../interface_8c.html#a77ee1839994dbc450bdd6f5da22706ca',1,'sup_ip(GtkWidget *widget, WINDOW *fenetre):&#160;interface.c']]],
+  ['supprimer_5fip_1',['supprimer_ip',['../includes_2catalogue__ip_8h.html#a4fff54a8310cf2b6e8a768a9d1378d1f',1,'supprimer_ip(const char *ip, const char *masque, bool graphique, bool ncurses, WINDOW *fenetre):&#160;catalogue_ip.c'],['../src_2includes_2catalogue__ip_8h.html#a4fff54a8310cf2b6e8a768a9d1378d1f',1,'supprimer_ip(const char *ip, const char *masque, bool graphique, bool ncurses, WINDOW *fenetre):&#160;catalogue_ip.c'],['../catalogue__ip_8c.html#a4fff54a8310cf2b6e8a768a9d1378d1f',1,'supprimer_ip(const char *ip, const char *masque, bool graphique, bool ncurses, WINDOW *fenetre):&#160;catalogue_ip.c']]]
+];
