@@ -1,60 +1,52 @@
-# Documentation du projet
+# Catalogue IP
 
-Ouvrir dans votre dossier ce fichier : ./Code/html/index.html
+Ouvrir dans votre dossier ce fichier : ./Catalogue_IP/html/index.html
 
-[Page web de la documentation](./Code/html/index.html)
+[Page web de la documentation](./Catalogue_IP/html/index.html)
 
 
-# Prérequis pour le code 
+### Prérequis pour le code 
  
 
 1. Installer les bibliothèques essentielles:
-
     ```
     sudo apt-get install build-essential
 
     ```
-    
 2. Installer GTK:
-
     ```
         sudo apt-get install libgtk-3-dev
         
     ```
-
 3. Installer Pango et Cairo:
-
     ```
         sudo apt-get install libpango1.0-dev libcairo2-dev
     ```
 4. Installer GDB:
-
  ```
        sudo apt-get install gdb
  ```
 5. Installer Nscurses:
-
    ```
      sudo apt-get install libncurses5-dev libncursesw5-dev
    ```
 6. Installer MySQL pour C :
-
    ```
      sudo apt-get install libmysqlcppconn-dev
    ```
-# Pour exécuter le code
+### Pour exécuter le code
 
-1. A faire dans le dossier "code" :
+1. À faire dans le dossier "Catalogue_IP/src" :
    
 ```
-gcc -o catalogue_ip src/*.c $(pkg-config --cflags --libs gtk+-3.0) -lm -lsqlite3 -g3 -lncurses -g
+gcc -o catalogue_ip *.c `pkg-config --cflags --libs gtk+-3.0` -lncurses -lsqlite3
 ```
 
 2. Puis exécuter avec cette commande : 
 ```
 ./catalogue_ip
 ```
-# IP C-atalogue
+# Sujet
 
 Vous allez créer un utilitaire permettant de cataloguer les adresses IP(v4).
 L'utilitaire doit permettre de:
@@ -64,12 +56,12 @@ L'utilitaire doit permettre de:
 3. Afficher une adresse IP sous sa forme binaire, hexa, ou décimale
 4. Une validation doit être mise en place
 
-## 1) Persistance
+### 1) Persistance
 
 Il est demandé que les IP du catalogue soient stockées par le programme puis chargées lors de son ouverture.
 Les addresses Ip doivent rester persister entre les executions du programme.
 
-## 2) Filtrage par addresses mac
+### 2) Filtrage par addresses mac
 
 Il doit être possible de faire une recherche de la facon suivante :
 
@@ -77,7 +69,7 @@ Il doit être possible de faire une recherche de la facon suivante :
 - on demande à l'utilisateur un masque
 - on renvoie les addresses stockées qui appartiennent au même sous-réseau que celle donnée par l'utilisateur.
 
-## 3) Binaire/hexadécimal/décimal
+### 3) Binaire/hexadécimal/décimal
 
 Les addresses IP doivent être affichées sous leurs formes binaires, hexadécimales, et décimales.
 
@@ -89,7 +81,7 @@ ex :
 C0.A8.1.1
 ```
 
-## 4) Validation
+### 4) Validation
 
 Une validation doit être faite pour que l'on ne puisse pas entrer n'importe quoi comme addresses IP.
 
@@ -100,7 +92,7 @@ afs.213.sf.23ew // Invalide
 172.45.223.1    // invalide
 ```
 
-## Boucle principale
+### Boucle principale
 
 Le programme doit s'afficher comme un menu et interagir avec l'utilisateur.
 Il ne doit pas se fermer sans la demande de celui-ci.
